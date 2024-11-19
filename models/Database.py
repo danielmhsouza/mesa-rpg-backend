@@ -80,6 +80,47 @@ class Database:
         values = (user_data['user_name'], user_data['email'], user_data['password'], user_data['user_id'])
         return Database._execute_query(query, values)
 
+    # Função de Atualização de Senha
+    @staticmethod
+    def update_user_password(user_id: int, new_password: str) -> bool:
+        """Atualiza a senha de um usuário."""
+        query = "UPDATE user SET password = %s WHERE user_id = %s"
+        values = (new_password, user_id)
+        return Database._execute_query(query, values)
+
+    # Função de Atualização de Nome
+    @staticmethod
+    def update_user_name(user_id: int, new_name: str) -> bool:
+        """Atualiza o nome de um usuário."""
+        query = "UPDATE user SET user_name = %s WHERE user_id = %s"
+        values = (new_name, user_id)
+        return Database._execute_query(query, values)
+
+    
+    # Função de Atualização de Campanha
+    @staticmethod
+    def update_user_campaign(user_id: int, entry_campaign: list) -> bool:
+        """Atualiza a lista de campanhas de entrada de um usuário."""
+        query = "UPDATE user SET entry_campaign = %s WHERE user_id = %s"
+        values = (entry_campaign, user_id)
+        return Database._execute_query(query, values)
+
+    # Função de Atualização de Personagens
+    @staticmethod
+    def update_user_characters(user_id: int, characters: list) -> bool:
+        """Atualiza a lista de personagens de um usuário."""
+        query = "UPDATE user SET characters = %s WHERE user_id = %s"
+        values = (characters, user_id)
+        return Database._execute_query(query, values)
+
+    # Função de Atualização de Campanhas Criadas
+    @staticmethod
+    def update_user_created_campaign(user_id: int, created_campaign: list) -> bool:
+        """Atualiza a lista de campanhas criadas de um usuário."""
+        query = "UPDATE user SET created_campaign = %s WHERE user_id = %s"
+        values = (created_campaign, user_id)
+        return Database._execute_query(query, values)
+
     # Funções de Campanha
     @staticmethod
     def insert_campaign(name: str, desc: str, freq: str, img_link: str, user_id: int) -> int:
@@ -131,6 +172,32 @@ class Database:
         query = db.query_campaigns["update"]
         values = (campaign_data['name'], campaign_data['description'], campaign_data['freq'], campaign_data['img_link'], campaign_data['campaign_id'])
         return Database._execute_query(query, values)
+    
+    @staticmethod
+    def delete_campaign(campaign_id: int) -> bool:
+        """
+        Deleta uma campanha do banco de dados.
+        :param campaign_id: ID da campanha a ser deletada.
+        :return: Retorna True se a exclusão for bem-sucedida, False caso contrário.
+        """
+        try:
+            # Excluir as entradas de campanha associadas à campanha
+            query_entry_campaign = "DELETE FROM entry_campaign WHERE campaign_id = %s"
+            values_entry_campaign = (campaign_id,)
+            Database._execute_query(query_entry_campaign, values_entry_campaign)
+
+            # Excluir personagens relacionados à campanha (se necessário)
+            query_characters = "DELETE FROM character WHERE campaign_id = %s"
+            values_characters = (campaign_id,)
+            Database._execute_query(query_characters, values_characters)
+
+            # Excluir a campanha
+            query = query_campaigns["delete"]
+            values = (campaign_id,)
+            return Database._execute_query(query, values)
+        except Exception as e:
+            print(f"Erro ao excluir campanha: {e}")
+            return False
 
     # Funções de Personagem
     @staticmethod
@@ -217,32 +284,7 @@ class Database:
         query = db.query_characters["delete"]
         values = (character_id,)
         return Database._execute_query(query, values)
-
-    # Funções de Inventário
-    @staticmethod
-    def insert_inventory(character_id: int, artifact_id: int) -> bool:
-        """
-        Adiciona um artefato ao inventário de um personagem.
-        :param character_id: ID do personagem.
-        :param artifact_id: ID do artefato a ser adicionado.
-        :return: Retorna True se o artefato foi adicionado com sucesso, False caso contrário.
-        """
-        query = db.query_inventory["register"]
-        values = (character_id, artifact_id)
-        return Database._execute_query(query, values)
-
-    @staticmethod
-    def delete_inventory(character_id: int, artifact_id: int) -> bool:
-        """
-        Remove um artefato do inventário de um personagem.
-        :param character_id: ID do personagem.
-        :param artifact_id: ID do artefato a ser removido.
-        :return: Retorna True se o artefato foi removido com sucesso, False caso contrário.
-        """
-        query = db.query_inventory["delete"]
-        values = (character_id, artifact_id)
-        return Database._execute_query(query, values)
-
+    
     # Funções de Entrada de Campanha
     @staticmethod
     def update_entry_campaign_user(code: int, user_id: int) -> bool:
@@ -254,6 +296,42 @@ class Database:
         """
         query = db.query_entry_campaign["register"]
         values = (user_id, code)
+        return Database._execute_query(query, values)
+
+    # Funções de Inventário
+    @staticmethod
+    def insert_artifact_in_inventory(character_id: int, artifact_id: int) -> bool:
+        """
+        Adiciona um artefato ao inventário de um personagem.
+        :param character_id: ID do personagem.
+        :param artifact_id: ID do artefato a ser adicionado.
+        :return: Retorna True se o artefato foi adicionado com sucesso, False caso contrário.
+        """
+        query = db.query_inventory["register"]
+        values = (character_id, artifact_id)
+        return Database._execute_query(query, values)
+    
+    @staticmethod
+    def select_inventory(character_id: int) -> List[Dict[str, Any]]:
+        """Retorna todos os artefatos de um personagem do banco de dados."""
+        query = query_inventory["select"]
+        values = (character_id,)
+        result = Database._execute_select_query(query, values)
+        artifacts = []
+        for row in result:
+            artifacts.append(Artifact.get_by_id(row[1]))  # Cria objetos Artifact
+        return artifacts
+
+    @staticmethod
+    def delete_inventory(character_id: int, artifact_id: int) -> bool:
+        """
+        Remove um artefato do inventário de um personagem.
+        :param character_id: ID do personagem.
+        :param artifact_id: ID do artefato a ser removido.
+        :return: Retorna True se o artefato foi removido com sucesso, False caso contrário.
+        """
+        query = db.query_inventory["delete"]
+        values = (character_id, artifact_id)
         return Database._execute_query(query, values)
 
     #Funções de Artefato
