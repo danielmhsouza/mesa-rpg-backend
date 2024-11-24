@@ -1,66 +1,159 @@
-
-
-from typing import List, Dict, Any
-
+from flask import Flask, request, jsonify
 from controllers.Controller import Controller
 
 class Route:
-    def __init__(self):
+    def __init__(self, app: Flask):
+        self.app = app
         self.controller = Controller()
+        self.register_routes()
 
-    def login(self, email: str, password: str) -> Dict[str, Any]:
+    def register_routes(self):
         """
-        Realiza o login do usuário usando o controlador.
-        :param email: E-mail do usuário.
-        :param password: Senha do usuário.
-        :return: Dados do usuário.
+        Registra todas as rotas da aplicação.
         """
-        return self.controller.login(email, password)
-    def register(self, user_name: str, email: str, password: str, conf_pass: str):
-        if conf_pass != password:
-            return {
-                "statusCode": 403,
-                "data": "Confirme a senha corretamente!"
-            }
-        return self.controller.register(user_name, email, password)
+        self.app.add_url_rule('/login', 'login', self.login, methods=['POST'])
+        self.app.add_url_rule('/register', 'register', self.register, methods=['POST'])
+        self.app.add_url_rule('/create_campaign', 'create_campaign', self.create_campaign, methods=['POST'])
+        self.app.add_url_rule('/enter_campaign_as_master', 'enter_campaign_as_master', self.enter_campaign_as_master, methods=['POST'])
+        self.app.add_url_rule('/enter_campaign_as_player', 'enter_campaign_as_player', self.enter_campaign_as_player, methods=['POST'])
+        self.app.add_url_rule('/add_artifact', 'add_artifact', self.add_artifact, methods=['POST'])
+        self.app.add_url_rule('/add_item_to_character', 'add_item_to_character', self.add_item_to_character, methods=['POST'])
+        self.app.add_url_rule('/remove_item_from_character', 'remove_item_from_character', self.remove_item_from_character, methods=['POST'])
 
-    def enter_campaign(self, code: int, character_code: int) -> bool:
+    def login(self):
         """
-        Adiciona uma entrada de campanha usando o controlador.
-        :param code: Código da campanha.
-        :param character_code: Lista de códigos de personagens.
-        :return: Retorna True se a entrada na campanha for bem-sucedida, False caso contrário.
+        Rota de login, onde o usuário envia e-mail e senha para autenticação.
+        :return: Resposta JSON com o status da operação.
         """
-        return self.controller.insert_entry_campaign(code, character_code)
+        data = request.get_json()
+        email = data.get('email')
+        password = data.get('password')
 
-    def create_campaign(self, name: str, desc: str, freq: str, img_link: str) -> bool:
-        """
-        Cria uma nova campanha usando o controlador.
-        :param name: Nome da campanha.
-        :param desc: Descrição da campanha.
-        :param freq: Frequência da campanha.
-        :param img_link: Link para a imagem da campanha.
-        :return: Retorna True se a criação da campanha for bem-sucedida, False caso contrário.
-        """
-        return self.controller.create_campaign(name, desc, freq, img_link)
+        if not email or not password:
+            return jsonify({"error": "Email e senha são obrigatórios"}), 400
 
-    def enter_campaign_as_master(self, code: int, id_user: int) -> Dict[str, Any]:
-        """
-        Entra em uma campanha como mestre usando o controlador.
-        :param code: Código da campanha.
-        :param id_user: ID do usuário.
-        :return: Dados da campanha e tipo de usuário.
-        """
-        return self.controller.enter_campaign_as_master(code, id_user)
+        user_data = self.controller.login(email, password)
+        if user_data:
+            return jsonify(user_data), 200
+        return jsonify({"error": "Credenciais inválidas"}), 401
 
-    def enter_campaign_as_player(self, code: int, id_user: int) -> Dict[str, Any]:
+    def register(self):
         """
-        Entra em uma campanha como jogador usando o controlador.
-        :param code: Código da campanha.
-        :param id_user: ID do usuário.
-        :return: Dados da campanha e tipo de usuário.
+        Rota de registro, onde o usuário cria uma conta.
+        :return: Resposta JSON com o status da operação.
         """
-        return self.controller.enter_campaign_as_player(code, id_user)
+        data = request.get_json()
+        user_name = data.get('user_name')
+        email = data.get('email')
+        password = data.get('password')
+        confirm_password = data.get('confirm_password')
 
-    def create_character(self, data):
-        pass
+        if not user_name or not email or not password or not confirm_password:
+            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+        
+        if password != confirm_password:
+            return jsonify({"error": "As senhas não coincidem"}), 400
+
+        if self.controller.register(user_name, email, password, confirm_password):
+            return jsonify({"message": "Usuário registrado com sucesso!"}), 201
+        return jsonify({"error": "Erro ao registrar usuário"}), 500
+
+    def create_campaign(self):
+        """
+        Rota para criar uma nova campanha.
+        :return: Resposta JSON com o status da operação.
+        """
+        data = request.get_json()
+        name = data.get('name')
+        desc = data.get('desc')
+        freq = data.get('freq')
+        img_link = data.get('img_link')
+
+        if not name or not desc or not freq or not img_link:
+            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+
+        if self.controller.create_campaign(name, desc, freq, img_link):
+            return jsonify({"message": "Campanha criada com sucesso!"}), 201
+        return jsonify({"error": "Erro ao criar campanha"}), 500
+
+    def enter_campaign_as_master(self):
+        """
+        Rota para o usuário entrar em uma campanha como mestre.
+        :return: Resposta JSON com o status da operação.
+        """
+        data = request.get_json()
+        code = data.get('code')
+
+        if not code:
+            return jsonify({"error": "Código da campanha é obrigatório"}), 400
+
+        campaign_data = self.controller.enter_campaign_as_master(code)
+        if campaign_data:
+            return jsonify(campaign_data), 200
+        return jsonify({"error": "Erro ao entrar na campanha como mestre"}), 500
+
+    def enter_campaign_as_player(self):
+        """
+        Rota para o usuário entrar em uma campanha como jogador.
+        :return: Resposta JSON com o status da operação.
+        """
+        data = request.get_json()
+        code = data.get('code')
+
+        if not code:
+            return jsonify({"error": "Código da campanha é obrigatório"}), 400
+
+        campaign_data = self.controller.enter_campaign_as_player(code)
+        if campaign_data:
+            return jsonify(campaign_data), 200
+        return jsonify({"error": "Erro ao entrar na campanha como jogador"}), 500
+
+    def add_artifact(self):
+        """
+        Rota para adicionar um artefato à campanha.
+        :return: Resposta JSON com o status da operação.
+        """
+        data = request.get_json()
+        campaign_code = data.get('campaign_code')
+        name = data.get('name')
+        desc = data.get('desc')
+        category = data.get('category')
+
+        if not campaign_code or not name or not desc or not category:
+            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+
+        if self.controller.add_artifact_to_campaign(campaign_code, name, desc, category):
+            return jsonify({"message": "Artefato adicionado com sucesso!"}), 201
+        return jsonify({"error": "Erro ao adicionar artefato"}), 500
+
+    def add_item_to_character(self):
+        """
+        Rota para adicionar um artefato ao personagem.
+        :return: Resposta JSON com o status da operação.
+        """
+        data = request.get_json()
+        artifact_code = data.get('artifact_code')
+        character_code = data.get('character_code')
+
+        if not artifact_code or not character_code:
+            return jsonify({"error": "Código do artefato e personagem são obrigatórios"}), 400
+
+        if self.controller.add_item_to_character(artifact_code, character_code):
+            return jsonify({"message": "Item adicionado ao personagem com sucesso!"}), 200
+        return jsonify({"error": "Erro ao adicionar item ao personagem"}), 500
+
+    def remove_item_from_character(self):
+        """
+        Rota para remover um artefato do inventário do personagem.
+        :return: Resposta JSON com o status da operação.
+        """
+        data = request.get_json()
+        artifact_code = data.get('artifact_code')
+        character_code = data.get('character_code')
+
+        if not artifact_code or not character_code:
+            return jsonify({"error": "Código do artefato e personagem são obrigatórios"}), 400
+
+        if self.controller.remove_item_from_character(artifact_code, character_code):
+            return jsonify({"message": "Item removido do personagem com sucesso!"}), 200
+        return jsonify({"error": "Erro ao remover item do personagem"}), 500
