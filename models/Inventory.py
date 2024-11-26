@@ -1,8 +1,11 @@
-
-
 class Inventory:
-    def __init__(self):
-        self.artifacts = []
+    def __init__(self, character_id: int):
+        self.character_id = character_id
+        self.artifacts = self.load_artifacts_from_db()
+
+    def load_artifacts_from_db(self):
+        """Carrega todos os artefatos associados a este personagem do banco de dados."""
+        return Database.select_inventory(self.character_id)
 
     def add_artifact(self, artifact, index: int) -> bool:
         """
@@ -13,7 +16,10 @@ class Inventory:
         """
         if 0 <= index <= len(self.artifacts):
             self.artifacts.insert(index, artifact)
-            return True
+            if Database.insert_inventory(self.character_id, artifact.artifact_id):
+                return True
+            else:
+                self.artifacts.remove(artifact)
         return False
 
     def drop_artifact(self, index: int) -> bool:
@@ -23,6 +29,9 @@ class Inventory:
         :return: Retorna True se o artefato foi removido com sucesso, False caso contrário.
         """
         if 0 <= index < len(self.artifacts):
-            self.artifacts.pop(index)
-            return True
+            artifact = self.artifacts.pop(index)
+            if Database.delete_inventory(self.character_id, artifact.artifact_id):
+                return True
+            else:
+                self.artifacts.insert(index, artifact)
         return False

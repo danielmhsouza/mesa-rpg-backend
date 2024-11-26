@@ -21,7 +21,7 @@ query_characters = {
 
 query_artifacts = {
     "register": "INSERT INTO artifact (campaign_id, name, desc, category) VALUES (%s, %s, %s, %s)",
-    "select": "SELECT * FROM artifact WHERE artifact_id = %s",
+    "select": "SELECT * FROM artifact WHERE campaign_id = %s",
     "update": "UPDATE artifact SET name = %s, desc = %s, category = %s WHERE artifact_id = %s",
     "delete": "DELETE FROM artifact WHERE artifact_id = %s",
 }

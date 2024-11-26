@@ -1,8 +1,8 @@
-
 class Character:
-    def __init__(self, user_character: int, user_id: int, name: str, c_class: str, race: str, img_link: str, money: float,
-                 force: int, dest: int, consti: int, intel: int, wisdom: int, charisma: int, armor: int,
-                 initi: int, desloc: int, hp: int, mana: int, b_proef: int, inspiration: int):
+    def __init__(self, user_character: int = None, user_id: int = 0, name: str = "", c_class: str = "", race: str = "", 
+                 img_link: str = "", money: float = 0.0, force: int = 0, dest: int = 0, consti: int = 0, intel: int = 0,
+                 wisdom: int = 0, charisma: int = 0, armor: int = 0, initi: int = 0, desloc: int = 0, hp: int = 0,
+                 mana: int = 0, b_proef: int = 0, inspiration: int = 0):
         self.user_character = user_character
         self.user_id = user_id
         self.name = name
@@ -103,3 +103,44 @@ class Character:
 
     def set_inspiration(self, inspiration: int):
         self._inspiration = inspiration
+
+    # Save or update the character in the database
+    def save(self):
+        """Salva ou atualiza o personagem no banco de dados."""
+        character_data = {
+            'user_id': self.user_id,
+            'name': self.name,
+            'class': self.c_class,
+            'img_link': self.img_link,
+            'race': self.race,
+            'money': self.money,
+            'force': self._force,
+            'dest': self._dest,
+            'consti': self._consti,
+            'intel': self._intel,
+            'wisdom': self._wisdom,
+            'charisma': self._charisma,
+            'armor': self._armor,
+            'initi': self._initi,
+            'desloc': self._desloc,
+            'hp': self._hp,
+            'mana': self._mana,
+            'b_proef': self._b_proef,
+            'inspiration': self._inspiration
+        }
+
+        if self.user_character:
+            return Database.update_character(character_data)
+        else:
+            self.user_character = Database.insert_character(character_data)
+            return self.user_character
+
+    @staticmethod
+    def get_by_id(character_id: int):
+        """Obtém um personagem do banco de dados pelo ID."""
+        return Database.select_character(character_id)
+
+    @staticmethod
+    def delete(character_id: int):
+        """Deleta um personagem do banco de dados."""
+        return Database.delete_character(character_id)
