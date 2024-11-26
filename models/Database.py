@@ -3,10 +3,10 @@ import mysql.connector
 
 class Database:
 
-    _hostname: str = 'hostname'
-    _password: str = 'password'
-    _db_name: str = 'db_name'
-    _user: str = "user"
+    _hostname: str = '127.0.0.1'
+    _password: str = 'aluno123'
+    _db_name: str = 'spellboundtable'
+    _user: str = "aluno"
 
     db = mysql.connector.connect(
                 host= _hostname,
