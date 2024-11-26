@@ -6,7 +6,7 @@ class Database:
 
     _hostname: str = '127.0.0.1'
     _password: str = 'aluno123'
-    _db_name: str = 'spellboundtable'
+    _db_name: str = 'spellbountable'
     _user: str = "aluno"
 
     db = mysql.connector.connect(
@@ -16,10 +16,10 @@ class Database:
                 database= _db_name
             )
 
-    def _execute_query(query: str, values:str="") -> bool:
+    def _execute_query(query: str, values:tuple=None) -> bool:
         mycursor = Database.db.cursor()
         
-        if values != "":
+        if values != None:
             mycursor.execute(query, values)
             Database.db.commit()
             return True
