@@ -37,25 +37,20 @@ class Route:
             return jsonify(user_data), 200
         return jsonify({"error": "Credenciais inválidas"}), 401
 
-    def register(self):
+    def register(self, user_name, email, password, confirm_password):
         """
         Rota de registro, onde o usuário cria uma conta.
         :return: Resposta JSON com o status da operação.
         """
-        data = request.get_json()
-        user_name = data.get('user_name')
-        email = data.get('email')
-        password = data.get('password')
-        confirm_password = data.get('confirm_password')
 
         if not user_name or not email or not password or not confirm_password:
-            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+            return jsonify({"error": "Todos os campos são obrigatórios"}), 500
         
         if password != confirm_password:
-            return jsonify({"error": "As senhas não coincidem"}), 400
+            return jsonify({"error": "As senhas não coincidem"}), 500
 
         if self.controller.register(user_name, email, password, confirm_password):
-            return jsonify({"message": "Usuário registrado com sucesso!"}), 201
+            return jsonify({"message": "Usuário registrado com sucesso!"}), 200
         return jsonify({"error": "Erro ao registrar usuário"}), 500
 
     def create_campaign(self):
