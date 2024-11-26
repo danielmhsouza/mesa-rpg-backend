@@ -4,10 +4,10 @@ import Database.querys as db
 
 class Database:
 
-    _hostname: str = 'hostname'
-    _password: str = 'password'
-    _db_name: str = 'db_name'
-    _user: str = "user"
+    _hostname: str = '127.0.0.1'
+    _password: str = 'aluno123'
+    _db_name: str = 'spellbountable'
+    _user: str = "aluno"
 
     db = mysql.connector.connect(
                 host= _hostname,
@@ -16,10 +16,10 @@ class Database:
                 database= _db_name
             )
 
-    def _execute_query(query: str, values:str="") -> bool:
+    def _execute_query(query: str, values:tuple=None) -> bool:
         mycursor = Database.db.cursor()
         
-        if values != "":
+        if values != None:
             mycursor.execute(query, values)
             Database.db.commit()
             return True
