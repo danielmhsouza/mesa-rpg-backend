@@ -6,7 +6,7 @@ class Database:
 
     _hostname: str = '127.0.0.1'
     _password: str = 'aluno123'
-    _db_name: str = 'spellbountable'
+    _db_name: str = 'spellboundtable'
     _user: str = "aluno"
 
     db = mysql.connector.connect(
@@ -27,10 +27,12 @@ class Database:
         mycursor.execute(query, values)
         return True
     
-    def _execute_select_query(query: str) -> list:
+    def _execute_select_query(query: str, values: tuple=None) -> list:
         mycursor = Database.db.cursor()
-
-        mycursor.execute(query)
+        if values != None:
+            mycursor.execute(query, values)
+        else:
+            mycursor.execute(query)
         return mycursor.fetchall()
 
     # Funções de Usuário
@@ -61,11 +63,19 @@ class Database:
         values = (email, password)
         result = Database._execute_select_query(query, values)
         if result:
+            entry = Database._execute_select_query(db.query_entry_campaign['select'], tuple(str(result[0][0])))
+            created = Database._execute_select_query(db.query_created_campaign['select'], tuple(str(result[0][0])))
+            characters = Database._execute_select_query(db.query_characters['select_ids'], tuple(str(result[0][0])))
+            
             return {
                 "user_id": result[0][0],
                 "user_name": result[0][1],
                 "email": result[0][2],
-                "password": result[0][3]
+                "password": result[0][3],
+                "entry_campaign": entry,
+                "created_campaign": created,
+                "characters": characters
+
             }
         return {}
 
@@ -138,6 +148,19 @@ class Database:
         if Database._execute_query(query, values):
             mycursor = Database.db.cursor()
             mycursor.execute("SELECT LAST_INSERT_ID()")
+            campaign_id = mycursor.fetchone()[0]
+            Database.insert_created_campaign(user_id, campaign_id)
+            return campaign_id
+        return 0
+    
+    @staticmethod
+    def insert_created_campaign(user_id: int, campaign_id: int) -> int:
+
+        query = db.query_created_campaign["register"]
+        values = (user_id, campaign_id)
+        if Database._execute_query(query, values):
+            mycursor = Database.db.cursor()
+            mycursor.execute("SELECT LAST_INSERT_ID()")
             return mycursor.fetchone()[0]
         return 0
 
@@ -151,6 +174,26 @@ class Database:
         query = db.query_campaigns["select"]
         values = (campaign_id,)
         result = Database._execute_select_query(query, values)
+        if result:
+            return {
+                "campaign_id": result[0][0],
+                "user_id": result[0][1],
+                "name": result[0][2],
+                "description": result[0][3],
+                "freq": result[0][4],
+                "img_link": result[0][5]
+            }
+        return {}
+    
+    @staticmethod
+    def select_any_campaign(campaign_ids: list) -> Dict[str, Any]:
+        """
+        Seleciona uma campanha do banco de dados com base no ID da campanha.
+        :param campaign_id: ID da campanha a ser selecionada.
+        :return: Dicionário contendo as informações da campanha (ID, nome, descrição, frequência e link da imagem), ou um dicionário vazio se não encontrar a campanha.
+        """
+        query = "SELECT * FROM campaign WHERE campaign_id IN (%s)" % ','.join(map(str, campaign_ids))
+        result = Database._execute_select_query(query)
         if result:
             return {
                 "campaign_id": result[0][0],

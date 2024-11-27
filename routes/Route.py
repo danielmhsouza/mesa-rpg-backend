@@ -1,36 +1,19 @@
-from flask import Flask, request, jsonify
+from flask import request, jsonify
 from controllers.Controller import Controller
 
 class Route:
-    def __init__(self, app: Flask):
-        self.app = app
+    def __init__(self):
         self.controller = Controller()
-        self.register_routes()
 
-    def register_routes(self):
-        """
-        Registra todas as rotas da aplicação.
-        """
-        self.app.add_url_rule('/login', 'login', self.login, methods=['POST'])
-        self.app.add_url_rule('/register', 'register', self.register, methods=['POST'])
-        self.app.add_url_rule('/create_campaign', 'create_campaign', self.create_campaign, methods=['POST'])
-        self.app.add_url_rule('/enter_campaign_as_master', 'enter_campaign_as_master', self.enter_campaign_as_master, methods=['POST'])
-        self.app.add_url_rule('/enter_campaign_as_player', 'enter_campaign_as_player', self.enter_campaign_as_player, methods=['POST'])
-        self.app.add_url_rule('/add_artifact', 'add_artifact', self.add_artifact, methods=['POST'])
-        self.app.add_url_rule('/add_item_to_character', 'add_item_to_character', self.add_item_to_character, methods=['POST'])
-        self.app.add_url_rule('/remove_item_from_character', 'remove_item_from_character', self.remove_item_from_character, methods=['POST'])
-
-    def login(self):
+    
+    def login(self, email, password):
         """
         Rota de login, onde o usuário envia e-mail e senha para autenticação.
         :return: Resposta JSON com o status da operação.
         """
-        data = request.get_json()
-        email = data.get('email')
-        password = data.get('password')
 
         if not email or not password:
-            return jsonify({"error": "Email e senha são obrigatórios"}), 400
+            return jsonify({"error": "Email e senha são obrigatórios"}), 500
 
         user_data = self.controller.login(email, password)
         if user_data:
@@ -53,22 +36,28 @@ class Route:
             return jsonify({"message": "Usuário registrado com sucesso!"}), 200
         return jsonify({"error": "Erro ao registrar usuário"}), 500
 
-    def create_campaign(self):
+    def get_campaing_data_from_id(self, id: list):
+        if not id:
+            return jsonify({"error": "Necessário uma lista de campanhas!"}), 500
+        
+        if len(id) < 0:
+            return jsonify({"msg": "Não há campanhas"}), 200
+        
+        campaings = self.controller.get_campaing_data(id)
+        if campaings:
+            return jsonify(campaings), 200
+
+    def create_campaign(self, name, desc, freq, img_link, user_id):
         """
         Rota para criar uma nova campanha.
         :return: Resposta JSON com o status da operação.
         """
-        data = request.get_json()
-        name = data.get('name')
-        desc = data.get('desc')
-        freq = data.get('freq')
-        img_link = data.get('img_link')
 
-        if not name or not desc or not freq or not img_link:
-            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+        if not name or not desc or not freq:
+            return jsonify({"error": "Nome, descrição e frequência sâo obrigatórios!"}), 500
 
-        if self.controller.create_campaign(name, desc, freq, img_link):
-            return jsonify({"message": "Campanha criada com sucesso!"}), 201
+        if self.controller.create_campaign(name, desc, freq, img_link, user_id):
+            return jsonify({"message": "Campanha criada com sucesso!"}), 200
         return jsonify({"error": "Erro ao criar campanha"}), 500
 
     def enter_campaign_as_master(self):

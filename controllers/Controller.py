@@ -58,6 +58,12 @@ class Controller:
             return True
         return False
 
+    def get_campaing_data(self, id: list):
+
+        campaings = Database.select_any_campaign(id)
+        
+        return campaings
+
     def insert_entry_campaign(self, code: int, character: List[str]) -> bool:
         """
         Insere o usuário em uma campanha, criando personagens associados.
@@ -79,7 +85,7 @@ class Controller:
             print(f"Erro ao inserir entrada na campanha: {e}")
             return False
 
-    def create_campaign(self, name: str, desc: str, freq: str, img_link: str) -> bool:
+    def create_campaign(self, name: str, desc: str, freq: str, img_link: str, user_id: int) -> bool:
         """
         Cria uma nova campanha no banco de dados.
         :param name: Nome da campanha.
@@ -88,9 +94,8 @@ class Controller:
         :param img_link: Link para imagem da campanha.
         :return: True se a campanha foi criada com sucesso, False caso contrário.
         """
-        created_campaign_code = Database.insert_campaign(name, desc, freq, img_link, self.user.get_id())
+        created_campaign_code = Database.insert_campaign(name, desc, freq, img_link, user_id)
         if created_campaign_code > 0:
-            self.user.insert_created_campaign(created_campaign_code)
             return True
         return False
 

@@ -17,6 +17,7 @@ query_characters = {
     "select": "SELECT * FROM character WHERE character_id = %s",
     "update": "UPDATE character SET name = %s, class = %s, img_link = %s, race = %s, money = %s, force = %s, dest = %s, consti = %s, intel = %s, wisdom = %s, charisma = %s, armor = %s, init = %s, desloc = %s, hp = %s, bProef = %s, inspiration = %s WHERE character_id = %s",
     "delete": "DELETE FROM character WHERE character_id = %s",
+    "select_ids": "SELECT character_id FROM `character` WHERE user_id = %s"
 }
 
 query_artifacts = {
@@ -34,12 +35,12 @@ query_inventory = {
 
 query_entry_campaign = {
     "register": "INSERT INTO entry_campaign (user_id, campaign_id) VALUES (%s, %s)",
-    "select": "SELECT * FROM entry_campaign WHERE user_id = %s AND campaign_id = %s",
+    "select": "SELECT campaign_id FROM entry_campaign WHERE user_id = %s",
     "delete": "DELETE FROM entry_campaign WHERE user_id = %s AND campaign_id = %s",
 }
 
 query_created_campaign = {
     "register": "INSERT INTO created_campaign (user_id, campaign_id) VALUES (%s, %s)",
-    "select": "SELECT * FROM created_campaign WHERE user_id = %s AND campaign_id = %s",
+    "select": "SELECT campaign_id FROM created_campaign WHERE user_id = %s",
     "delete": "DELETE FROM created_campaign WHERE user_id = %s AND campaign_id = %s",
 }
