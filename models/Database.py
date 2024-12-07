@@ -1,39 +1,56 @@
 from typing import List, Dict, Any
-import mysql.connector
+import mariadb
 import Database.querys as db
 
 class Database:
 
-    _hostname: str = '127.0.0.1'
-    _password: str = 'aluno123'
-    _db_name: str = 'spellboundtable'
-    _user: str = "aluno"
+    _hostname: str = 'mysql.freehostia.com'
+    _password: str = 'Ssswww#123'
+    _db_name: str = 'dansou481_spellboundtable'
+    _user: str = "dansou481_spellboundtable"
 
-    db = mysql.connector.connect(
-                host= _hostname,
-                user= _user,
-                password= _password,
-                database= _db_name
-            )
+    try:
+        # Estabelecendo a conexão
+        db = mariadb.connect(
+            host=_hostname,
+            port=3306,
+            user=_user,
+            password=_password,
+            database=_db_name
+        )
+        print("Conexão bem-sucedida com o banco MariaDB!")
+    except mariadb.Error as e:
+        print(f"Erro ao conectar ao MariaDB: {e}")
+        db = None
 
     def _execute_query(query: str, values:tuple=None) -> bool:
-        mycursor = Database.db.cursor()
-        
-        if values != None:
-            mycursor.execute(query, values)
+        try:
+            mycursor = Database.db.cursor()
+            if values:
+                mycursor.execute(query, values)
+            else:
+                mycursor.execute(query)
             Database.db.commit()
             return True
-        
-        mycursor.execute(query, values)
-        return True
+        except mariadb.Error as e:
+            print(f"Erro ao executar query: {e}")
+            return False
+        finally:
+            mycursor.close()
     
     def _execute_select_query(query: str, values: tuple=None) -> list:
-        mycursor = Database.db.cursor()
-        if values != None:
-            mycursor.execute(query, values)
-        else:
-            mycursor.execute(query)
-        return mycursor.fetchall()
+        try:
+            mycursor = Database.db.cursor()
+            if values:
+                mycursor.execute(query, values)
+            else:
+                mycursor.execute(query)
+            return mycursor.fetchall()
+        except mariadb.Error as e:
+            print(f"Erro ao executar SELECT query: {e}")
+            return []
+        finally:
+            mycursor.close()
 
     # Funções de Usuário
     @staticmethod
@@ -46,9 +63,12 @@ class Database:
         query = db.query_users["register"]
         values = (user_data['user_name'], user_data['email'], user_data['password'])
         if Database._execute_query(query, values):
-            mycursor = Database.db.cursor()
-            mycursor.execute("SELECT LAST_INSERT_ID()")
-            return mycursor.fetchone()[0]
+            try:
+                mycursor = Database.db.cursor()
+                mycursor.execute("SELECT LAST_INSERT_ID()")
+                return mycursor.fetchone()[0]
+            finally:
+                mycursor.close()
         return 0
 
     @staticmethod
