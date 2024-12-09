@@ -166,11 +166,14 @@ class Database:
         query = db.query_campaigns["register"]
         values = (user_id, name, desc, freq, img_link)
         if Database._execute_query(query, values):
-            mycursor = Database.db.cursor()
-            mycursor.execute("SELECT LAST_INSERT_ID()")
-            campaign_id = mycursor.fetchone()[0]
-            Database.insert_created_campaign(user_id, campaign_id)
-            return campaign_id
+            try:
+                mycursor = Database.db.cursor()
+                mycursor.execute("SELECT LAST_INSERT_ID()")
+                campaing_id = mycursor.fetchone()[0]
+                Database.insert_created_campaign(user_id, campaing_id)
+                return campaing_id
+            finally:
+                mycursor.close()
         return 0
     
     @staticmethod
@@ -179,9 +182,12 @@ class Database:
         query = db.query_created_campaign["register"]
         values = (user_id, campaign_id)
         if Database._execute_query(query, values):
-            mycursor = Database.db.cursor()
-            mycursor.execute("SELECT LAST_INSERT_ID()")
-            return mycursor.fetchone()[0]
+            try:
+                mycursor = Database.db.cursor()
+                mycursor.execute("SELECT LAST_INSERT_ID()")
+                return mycursor.fetchone()[0]
+            finally:
+                mycursor.close()
         return 0
 
     @staticmethod

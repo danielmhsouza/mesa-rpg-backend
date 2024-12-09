@@ -53,6 +53,7 @@ class Controller:
         }
 
         user_id = Database.insert_user(user_data)
+        print(f"\n\n Database response: {user_id} \n\n")
         if user_id:
             self.user = User(user_id, user_name, email, password, [], [], [])
             return True
