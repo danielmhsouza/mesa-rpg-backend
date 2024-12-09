@@ -1,8 +1,10 @@
 from flask import Flask, request
 from routes.Route import Route
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 route = Route()
 
 @app.route('/cadastro', methods=['POST'])
@@ -20,6 +22,7 @@ def rt_login():
     data = request.get_json()
     email = data['email']
     password = data['password']
+    print(f"\n\nemail: {email} senha: {password}\n\n")
 
     return route.login(email=email, password=password)
 
@@ -37,7 +40,7 @@ def rt_create_campaign():
 @app.route('/campanhas-usuario', methods=["GET"])
 def rt_user_campaigns():
     user_id = request.args.get('id')
-    return route.get_campaing_data_from_id
+    return route.get_campaing_data_from_id(user_id)
 
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
