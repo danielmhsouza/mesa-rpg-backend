@@ -191,45 +191,61 @@ class Database:
         return 0
 
     @staticmethod
-    def select_campaign(campaign_id: int) -> Dict[str, Any]:
+    def select_campaigns(user_id: int) -> List[Dict[str, Any]]:
         """
-        Seleciona uma campanha do banco de dados com base no ID da campanha.
-        :param campaign_id: ID da campanha a ser selecionada.
-        :return: Dicionário contendo as informações da campanha (ID, nome, descrição, frequência e link da imagem), ou um dicionário vazio se não encontrar a campanha.
+        Busca todas as campanhas associadas ao usuário (criadas ou que ele entrou).
+        :param user_id: ID do usuário.
+        :return: Lista com as campanhas associadas.
         """
-        query = db.query_campaigns["select"]
-        values = (campaign_id,)
-        result = Database._execute_select_query(query, values)
-        if result:
-            return {
-                "campaign_id": result[0][0],
-                "user_id": result[0][1],
-                "name": result[0][2],
-                "description": result[0][3],
-                "freq": result[0][4],
-                "img_link": result[0][5]
-            }
-        return {}
-    
-    @staticmethod
-    def select_any_campaign(campaign_ids: list) -> Dict[str, Any]:
-        """
-        Seleciona uma campanha do banco de dados com base no ID da campanha.
-        :param campaign_id: ID da campanha a ser selecionada.
-        :return: Dicionário contendo as informações da campanha (ID, nome, descrição, frequência e link da imagem), ou um dicionário vazio se não encontrar a campanha.
-        """
-        query = "SELECT * FROM campaign WHERE campaign_id IN (%s)" % ','.join(map(str, campaign_ids))
-        result = Database._execute_select_query(query)
-        if result:
-            return {
-                "campaign_id": result[0][0],
-                "user_id": result[0][1],
-                "name": result[0][2],
-                "description": result[0][3],
-                "freq": result[0][4],
-                "img_link": result[0][5]
-            }
-        return {}
+        # 1. Buscar os IDs das campanhas criadas e que o usuário entrou
+        query_created = "SELECT campaign_id FROM created_campaign WHERE user_id = %s;"
+        query_entry = "SELECT campaign_id FROM entry_campaign WHERE user_id = %s;"
+
+        created_ids = Database._execute_select_query(query_created, (user_id,))
+        entry_ids = Database._execute_select_query(query_entry, (user_id,))
+
+        # Combinar os IDs e remover duplicados
+        campaign_ids = list(set([row[0] for row in created_ids + entry_ids]))
+
+        if not campaign_ids:
+            return []  # Se não houver campanhas, retorna lista vazia
+
+        # 2. Buscar os dados das campanhas
+        query_campaigns = "SELECT * FROM campaign WHERE campaign_id IN (%s);" % ','.join(map(str, campaign_ids))
+        result = Database._execute_select_query(query_campaigns)
+
+        # 3. Transformar os resultados em dicionários
+        campaigns = []
+        for row in result:
+            campaigns.append({
+                "campaign_id": row[0],
+                "user_id": row[1],
+                "name": row[2],
+                "description": row[3],
+                "freq": row[4],
+                "img_link": row[5]
+            })
+        return campaigns
+
+    # @staticmethod
+    # def select_any_campaign(campaign_ids: list) -> Dict[str, Any]:
+    #     """
+    #     Seleciona uma campanha do banco de dados com base no ID da campanha.
+    #     :param campaign_id: ID da campanha a ser selecionada.
+    #     :return: Dicionário contendo as informações da campanha (ID, nome, descrição, frequência e link da imagem), ou um dicionário vazio se não encontrar a campanha.
+    #     """
+    #     query = "SELECT * FROM campaign WHERE campaign_id IN (%s)" % ','.join(map(str, campaign_ids))
+    #     result = Database._execute_select_query(query)
+    #     if result:
+    #         return {
+    #             "campaign_id": result[0][0],
+    #             "user_id": result[0][1],
+    #             "name": result[0][2],
+    #             "description": result[0][3],
+    #             "freq": result[0][4],
+    #             "img_link": result[0][5]
+    #         }
+    #     return {}
 
     @staticmethod
     def update_campaign(campaign_data: Dict[str, Any]) -> bool:
