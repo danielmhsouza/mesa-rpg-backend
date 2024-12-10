@@ -3,34 +3,34 @@ import mariadb
 import Database.querys as db
 
 class Database:
+    def __init__(self):
+        self._hostname: str = 'mysql.freehostia.com'
+        self._password: str = 'Ssswww#123'
+        self._db_name: str = 'dansou481_spellboundtable'
+        self._user: str = "dansou481_spellboundtable"
 
-    _hostname: str = 'mysql.freehostia.com'
-    _password: str = 'Ssswww#123'
-    _db_name: str = 'dansou481_spellboundtable'
-    _user: str = "dansou481_spellboundtable"
-
-    try:
-        # Estabelecendo a conexão
-        db = mariadb.connect(
-            host=_hostname,
-            port=3306,
-            user=_user,
-            password=_password,
-            database=_db_name
-        )
-        print("Conexão bem-sucedida com o banco MariaDB!")
-    except mariadb.Error as e:
-        print(f"Erro ao conectar ao MariaDB: {e}")
-        db = None
-
-    def _execute_query(query: str, values:tuple=None) -> bool:
         try:
-            mycursor = Database.db.cursor()
+            # Estabelecendo a conexão
+            self.db = mariadb.connect(
+                host=self._hostname,
+                port=3306,
+                user=self._user,
+                password=self._password,
+                database=self._db_name
+            )
+            print("Conexão bem-sucedida com o banco MariaDB!")
+        except mariadb.Error as e:
+            print(f"Erro ao conectar ao MariaDB: {e}")
+            self.db = None
+
+    def _execute_query(self, query: str, values:tuple=None) -> bool:
+        try:
+            mycursor = self.db.cursor()
             if values:
                 mycursor.execute(query, values)
             else:
                 mycursor.execute(query)
-            Database.db.commit()
+            self.db.commit()
             return True
         except mariadb.Error as e:
             print(f"Erro ao executar query: {e}")
@@ -38,9 +38,9 @@ class Database:
         finally:
             mycursor.close()
     
-    def _execute_select_query(query: str, values: tuple=None) -> list:
+    def _execute_select_query(self, query: str, values: tuple=None) -> list:
         try:
-            mycursor = Database.db.cursor()
+            mycursor = self.db.cursor()
             if values:
                 mycursor.execute(query, values)
             else:
@@ -52,9 +52,8 @@ class Database:
         finally:
             mycursor.close()
 
-    # Funções de Usuário
-    @staticmethod
-    def insert_user(user_data: Dict[str, Any]) -> int:
+
+    def insert_user(self, user_data: Dict[str, Any]) -> int:
         """
         Insere um novo usuário no banco de dados e retorna o ID do usuário inserido.
         :param user_data: Dicionário contendo as informações do usuário, incluindo nome, e-mail e senha.
@@ -62,17 +61,16 @@ class Database:
         """
         query = db.query_users["register"]
         values = (user_data['user_name'], user_data['email'], user_data['password'])
-        if Database._execute_query(query, values):
+        if self._execute_query(query, values):
             try:
-                mycursor = Database.db.cursor()
+                mycursor = self.db.cursor()
                 mycursor.execute("SELECT LAST_INSERT_ID()")
                 return mycursor.fetchone()[0]
             finally:
                 mycursor.close()
         return 0
 
-    @staticmethod
-    def select_user(email: str, password: str) -> Dict[str, Any]:
+    def select_user(self, email: str, password: str) -> Dict[str, Any]:
         """
         Seleciona um usuário do banco de dados com base no e-mail e senha fornecidos.
         :param email: E-mail do usuário.
@@ -81,26 +79,19 @@ class Database:
         """
         query = db.query_users["select"]
         values = (email, password)
-        result = Database._execute_select_query(query, values)
+        result = self._execute_select_query(query, values)
         if result:
-            entry = Database._execute_select_query(db.query_entry_campaign['select'], tuple(str(result[0][0])))
-            created = Database._execute_select_query(db.query_created_campaign['select'], tuple(str(result[0][0])))
-            characters = Database._execute_select_query(db.query_characters['select_ids'], tuple(str(result[0][0])))
-            
+  
             return {
                 "user_id": result[0][0],
                 "user_name": result[0][1],
                 "email": result[0][2],
                 "password": result[0][3],
-                "entry_campaign": entry,
-                "created_campaign": created,
-                "characters": characters
 
             }
         return {}
 
-    @staticmethod
-    def update_user(user_data: Dict[str, Any]) -> bool:
+    def update_user(self, user_data: Dict[str, Any]) -> bool:
         """
         Atualiza as informações de um usuário no banco de dados.
         :param user_data: Dicionário contendo as novas informações do usuário (nome, e-mail, senha e ID).
@@ -108,52 +99,44 @@ class Database:
         """
         query = db.query_users["update"]
         values = (user_data['user_name'], user_data['email'], user_data['password'], user_data['user_id'])
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    # Função de Atualização de Senha
-    @staticmethod
-    def update_user_password(user_id: int, new_password: str) -> bool:
+
+    def update_user_password(self, user_id: int, new_password: str) -> bool:
         """Atualiza a senha de um usuário."""
         query = "UPDATE user SET password = %s WHERE user_id = %s"
         values = (new_password, user_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    # Função de Atualização de Nome
-    @staticmethod
-    def update_user_name(user_id: int, new_name: str) -> bool:
+
+    def update_user_name(self, user_id: int, new_name: str) -> bool:
         """Atualiza o nome de um usuário."""
         query = "UPDATE user SET user_name = %s WHERE user_id = %s"
         values = (new_name, user_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
     
-    # Função de Atualização de Campanha
-    @staticmethod
-    def update_user_campaign(user_id: int, entry_campaign: list) -> bool:
+    def update_user_campaign(self, user_id: int, entry_campaign: list) -> bool:
         """Atualiza a lista de campanhas de entrada de um usuário."""
         query = "UPDATE user SET entry_campaign = %s WHERE user_id = %s"
         values = (entry_campaign, user_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    # Função de Atualização de Personagens
-    @staticmethod
-    def update_user_characters(user_id: int, characters: list) -> bool:
+
+    def update_user_characters(self, user_id: int, characters: list) -> bool:
         """Atualiza a lista de personagens de um usuário."""
         query = "UPDATE user SET characters = %s WHERE user_id = %s"
         values = (characters, user_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    # Função de Atualização de Campanhas Criadas
-    @staticmethod
-    def update_user_created_campaign(user_id: int, created_campaign: list) -> bool:
+    def update_user_created_campaign(self, user_id: int, created_campaign: list) -> bool:
         """Atualiza a lista de campanhas criadas de um usuário."""
         query = "UPDATE user SET created_campaign = %s WHERE user_id = %s"
         values = (created_campaign, user_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    # Funções de Campanha
-    @staticmethod
-    def insert_campaign(name: str, desc: str, freq: str, img_link: str, user_id: int) -> int:
+  
+    def insert_campaign(self, name: str, desc: str, freq: str, img_link: str, user_id: int) -> int:
         """
         Insere uma nova campanha no banco de dados e retorna o ID da campanha inserida.
         :param name: Nome da campanha.
@@ -165,33 +148,31 @@ class Database:
         """
         query = db.query_campaigns["register"]
         values = (user_id, name, desc, freq, img_link)
-        if Database._execute_query(query, values):
+        if self._execute_query(query, values):
             try:
-                mycursor = Database.db.cursor()
+                mycursor = self.db.cursor()
                 mycursor.execute("SELECT LAST_INSERT_ID()")
                 campaing_id = mycursor.fetchone()[0]
-                Database.insert_created_campaign(user_id, campaing_id)
+                self.insert_created_campaign(user_id, campaing_id)
                 return campaing_id
             finally:
                 mycursor.close()
         return 0
     
-    @staticmethod
-    def insert_created_campaign(user_id: int, campaign_id: int) -> int:
+    def insert_created_campaign(self, user_id: int, campaign_id: int) -> int:
 
         query = db.query_created_campaign["register"]
         values = (user_id, campaign_id)
-        if Database._execute_query(query, values):
+        if self._execute_query(query, values):
             try:
-                mycursor = Database.db.cursor()
+                mycursor = self.db.cursor()
                 mycursor.execute("SELECT LAST_INSERT_ID()")
                 return mycursor.fetchone()[0]
             finally:
                 mycursor.close()
         return 0
 
-    @staticmethod
-    def select_campaigns(user_id: int) -> List[Dict[str, Any]]:
+    def select_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
         """
         Busca todas as campanhas associadas ao usuário (criadas ou que ele entrou).
         :param user_id: ID do usuário.
@@ -201,8 +182,8 @@ class Database:
         query_created = "SELECT campaign_id FROM created_campaign WHERE user_id = %s;"
         query_entry = "SELECT campaign_id FROM entry_campaign WHERE user_id = %s;"
 
-        created_ids = Database._execute_select_query(query_created, (user_id,))
-        entry_ids = Database._execute_select_query(query_entry, (user_id,))
+        created_ids = self._execute_select_query(query_created, (user_id,))
+        entry_ids = self._execute_select_query(query_entry, (user_id,))
 
         # Combinar os IDs e remover duplicados
         campaign_ids = list(set([row[0] for row in created_ids + entry_ids]))
@@ -212,7 +193,7 @@ class Database:
 
         # 2. Buscar os dados das campanhas
         query_campaigns = "SELECT * FROM campaign WHERE campaign_id IN (%s);" % ','.join(map(str, campaign_ids))
-        result = Database._execute_select_query(query_campaigns)
+        result = self._execute_select_query(query_campaigns)
 
         # 3. Transformar os resultados em dicionários
         campaigns = []
@@ -235,7 +216,7 @@ class Database:
     #     :return: Dicionário contendo as informações da campanha (ID, nome, descrição, frequência e link da imagem), ou um dicionário vazio se não encontrar a campanha.
     #     """
     #     query = "SELECT * FROM campaign WHERE campaign_id IN (%s)" % ','.join(map(str, campaign_ids))
-    #     result = Database._execute_select_query(query)
+    #     result = self._execute_select_query(query)
     #     if result:
     #         return {
     #             "campaign_id": result[0][0],
@@ -247,8 +228,7 @@ class Database:
     #         }
     #     return {}
 
-    @staticmethod
-    def update_campaign(campaign_data: Dict[str, Any]) -> bool:
+    def update_campaign(self, campaign_data: Dict[str, Any]) -> bool:
         """
         Atualiza as informações de uma campanha no banco de dados.
         :param campaign_data: Dicionário contendo as novas informações da campanha (nome, descrição, frequência, link da imagem e ID).
@@ -256,10 +236,9 @@ class Database:
         """
         query = db.query_campaigns["update"]
         values = (campaign_data['name'], campaign_data['description'], campaign_data['freq'], campaign_data['img_link'], campaign_data['campaign_id'])
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
     
-    @staticmethod
-    def delete_campaign(campaign_id: int) -> bool:
+    def delete_campaign(self, campaign_id: int) -> bool:
         """
         Deleta uma campanha do banco de dados.
         :param campaign_id: ID da campanha a ser deletada.
@@ -269,24 +248,23 @@ class Database:
             # Excluir as entradas de campanha associadas à campanha
             query_entry_campaign = "DELETE FROM entry_campaign WHERE campaign_id = %s"
             values_entry_campaign = (campaign_id,)
-            Database._execute_query(query_entry_campaign, values_entry_campaign)
+            self._execute_query(query_entry_campaign, values_entry_campaign)
 
             # Excluir personagens relacionados à campanha (se necessário)
             query_characters = "DELETE FROM character WHERE campaign_id = %s"
             values_characters = (campaign_id,)
-            Database._execute_query(query_characters, values_characters)
+            self._execute_query(query_characters, values_characters)
 
             # Excluir a campanha
-            query = query_campaigns["delete"]
+            query = db.query_campaigns["delete"]
             values = (campaign_id,)
-            return Database._execute_query(query, values)
+            return self._execute_query(query, values)
         except Exception as e:
             print(f"Erro ao excluir campanha: {e}")
             return False
 
-    # Funções de Personagem
-    @staticmethod
-    def insert_character(character_data: Dict[str, Any]) -> int:
+
+    def insert_character(self, character_data: Dict[str, Any]) -> int:
         """
         Insere um novo personagem no banco de dados e retorna o ID do personagem inserido.
         :param character_data: Dicionário contendo as informações do personagem (nome, classe, raça, atributos, etc.).
@@ -300,14 +278,13 @@ class Database:
             character_data['charisma'], character_data['armor'], character_data['initi'], character_data['desloc'],
             character_data['hp'], character_data['mana'], character_data['b_proef'], character_data['inspiration']
         )
-        if Database._execute_query(query, values):
-            mycursor = Database.db.cursor()
+        if self._execute_query(query, values):
+            mycursor = self.db.cursor()
             mycursor.execute("SELECT LAST_INSERT_ID()")
             return mycursor.fetchone()[0]
         return 0
 
-    @staticmethod
-    def select_character(character_id: int) -> Dict[str, Any]:
+    def select_character(self, character_id: int) -> Dict[str, Any]:
         """
         Seleciona um personagem do banco de dados com base no ID do personagem.
         :param character_id: ID do personagem a ser selecionado.
@@ -315,7 +292,7 @@ class Database:
         """
         query = db.query_characters["select"]
         values = (character_id,)
-        result = Database._execute_select_query(query, values)
+        result = self._execute_select_query(query, values)
         if result:
             return {
                 "character_id": result[0][0],
@@ -342,8 +319,7 @@ class Database:
             }
         return {}
 
-    @staticmethod
-    def update_character(character_data: Dict[str, Any]) -> bool:
+    def update_character(self, character_data: Dict[str, Any]) -> bool:
         """
         Atualiza as informações de um personagem no banco de dados.
         :param character_data: Dicionário contendo as novas informações do personagem (nome, classe, raça, atributos, etc.).
@@ -357,10 +333,9 @@ class Database:
             character_data['initi'], character_data['desloc'], character_data['hp'], character_data['mana'],
             character_data['b_proef'], character_data['inspiration'], character_data['character_id']
         )
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    @staticmethod
-    def delete_character(character_id: int) -> bool:
+    def delete_character(self, character_id: int) -> bool:
         """
         Deleta um personagem do banco de dados com base no ID do personagem.
         :param character_id: ID do personagem a ser deletado.
@@ -368,11 +343,9 @@ class Database:
         """
         query = db.query_characters["delete"]
         values = (character_id,)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
     
-    # Funções de Entrada de Campanha
-    @staticmethod
-    def update_entry_campaign_user(code: int, user_id: int) -> bool:
+    def update_entry_campaign_user(self, code: int, user_id: int) -> bool:
         """
         Atualiza a entrada de campanha do usuário no banco de dados.
         :param code: Código da campanha a ser atualizada.
@@ -381,11 +354,9 @@ class Database:
         """
         query = db.query_entry_campaign["register"]
         values = (user_id, code)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    # Funções de Inventário
-    @staticmethod
-    def insert_artifact_in_inventory(character_id: int, artifact_id: int) -> bool:
+    def insert_artifact_in_inventory(self, character_id: int, artifact_id: int) -> bool:
         """
         Adiciona um artefato ao inventário de um personagem.
         :param character_id: ID do personagem.
@@ -394,21 +365,19 @@ class Database:
         """
         query = db.query_inventory["register"]
         values = (character_id, artifact_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
     
-    @staticmethod
-    def select_inventory(character_id: int) -> List[Dict[str, Any]]:
+    def select_inventory(self, character_id: int) -> List[Dict[str, Any]]:
         """Retorna todos os artefatos de um personagem do banco de dados."""
-        query = query_inventory["select"]
+        query = db.query_inventory["select"]
         values = (character_id,)
-        result = Database._execute_select_query(query, values)
+        result = self._execute_select_query(query, values)
         artifacts = []
         for row in result:
             artifacts.append(Artifact.get_by_id(row[1]))  # Cria objetos Artifact
         return artifacts
 
-    @staticmethod
-    def delete_inventory(character_id: int, artifact_id: int) -> bool:
+    def delete_inventory(self, character_id: int, artifact_id: int) -> bool:
         """
         Remove um artefato do inventário de um personagem.
         :param character_id: ID do personagem.
@@ -417,26 +386,24 @@ class Database:
         """
         query = db.query_inventory["delete"]
         values = (character_id, artifact_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
     #Funções de Artefato
-    @staticmethod
-    def insert_artifact(campaign_id: int, name: str, desc: str, category: str) -> bool:
+    def insert_artifact(self, campaign_id: int, name: str, desc: str, category: str) -> bool:
         """Insere um artefato na campanha no banco de dados."""
-        query = query_artifacts["register"]
+        query = db.query_artifacts["register"]
         values = (campaign_id, name, desc, category)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
-    @staticmethod
-    def select_artifact(artifact_id: int) -> Dict[str, Any]:
+    def select_artifact(self, artifact_id: int) -> Dict[str, Any]:
         """
         Seleciona um artefato do banco de dados com base no ID do artefato.
         :param artifact_id: ID do artefato a ser selecionado.
         :return: Dicionário contendo as informações do artefato (ID, nome, descrição, categoria).
         """
-        query = query_artifacts["select"]
+        query = db.query_artifacts["select"]
         values = (artifact_id,)
-        result = Database._execute_select_query(query, values)
+        result = self._execute_select_query(query, values)
         if result:
             return {
                 "artifact_id": result[0][0],
@@ -447,8 +414,7 @@ class Database:
             }
         return {}
 
-    @staticmethod
-    def update_artifact(artifact_id: int, name: str, desc: str, category: str) -> bool:
+    def update_artifact(self, artifact_id: int, name: str, desc: str, category: str) -> bool:
         """
         Atualiza as informações de um artefato no banco de dados.
         :param artifact_id: ID do artefato a ser atualizado.
@@ -457,14 +423,13 @@ class Database:
         :param category: Nova categoria do artefato.
         :return: Retorna True se a atualização for bem-sucedida, False caso contrário.
         """
-        query = query_artifacts["update"]
+        query = db.query_artifacts["update"]
         values = (name, desc, category, artifact_id)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)
 
 
-    @staticmethod
-    def delete_artifact(artifact_id: int) -> bool:
+    def delete_artifact(self, artifact_id: int) -> bool:
         """Remove um artefato do banco de dados."""
-        query = query_artifacts["delete"]
+        query = db.query_artifacts["delete"]
         values = (artifact_id,)
-        return Database._execute_query(query, values)
+        return self._execute_query(query, values)

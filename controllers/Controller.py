@@ -10,6 +10,7 @@ class Controller:
         self.user = None
         self.campaign = None
         self.master = None
+        self.database = Database()
 
     def login(self, email: str, password: str) -> Dict[str, Any]:
         """
@@ -18,17 +19,8 @@ class Controller:
         :param password: Senha do usuário.
         :return: Dados do usuário, ou dicionário vazio se não encontrado.
         """
-        user_data = Database.select_user(email, password)
+        user_data = self.database.select_user(email, password)
         if user_data:
-            self.user = User(
-                user_data["user_id"],
-                user_data["user_name"],
-                user_data["email"],
-                user_data["password"],
-                user_data["entry_campaign"],
-                user_data["created_campaign"],
-                user_data["characters"]
-            )
             return user_data
         return {}
 
@@ -52,7 +44,7 @@ class Controller:
             "password": password
         }
 
-        user_id = Database.insert_user(user_data)
+        user_id = self.database.insert_user(user_data)
         print(f"\n\n Database response: {user_id} \n\n")
         if user_id:
             self.user = User(user_id, user_name, email, password, [], [], [])
@@ -60,7 +52,7 @@ class Controller:
         return False
 
     def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
-        return Database.select_campaigns(user_id)
+        return self.database.select_campaigns(user_id)
 
     def insert_entry_campaign(self, code: int, character: List[str]) -> bool:
         """
@@ -73,11 +65,11 @@ class Controller:
             # Adiciona o usuário à campanha
             self.user.insert_entry_campaign(code)
             # Cria o personagem
-            character_code = Database.insert_character(character)
+            character_code = self.database.insert_character(character)
             self.user.insert_character(character_code)
             # Atualiza os dados no banco
-            Database.update_entry_campaign_user(code, self.user.get_id())
-            Database.update_user_characters(character_code)
+            self.database.update_entry_campaign_user(code, self.user.get_id())
+            self.database.update_user_characters(character_code)
             return True
         except Exception as e:
             print(f"Erro ao inserir entrada na campanha: {e}")
@@ -92,7 +84,7 @@ class Controller:
         :param img_link: Link para imagem da campanha.
         :return: True se a campanha foi criada com sucesso, False caso contrário.
         """
-        created_campaign_code = Database.insert_campaign(name, desc, freq, img_link, user_id)
+        created_campaign_code = self.database.insert_campaign(name, desc, freq, img_link, user_id)
         if created_campaign_code > 0:
             return True
         return False
@@ -103,7 +95,7 @@ class Controller:
         :param code: Código da campanha.
         :return: Dados da campanha e tipo de usuário (mestre).
         """
-        campaign_data = Database.select_campaign(code)
+        campaign_data = self.database.select_campaign(code)
         if campaign_data:
             self.master = Master(self.user.get_name(), campaign_data["campaign_id"])
             return {"campaign": campaign_data, "user_type": "master"}
@@ -115,7 +107,7 @@ class Controller:
         :param code: Código da campanha.
         :return: Dados da campanha e tipo de usuário (jogador).
         """
-        campaign_data = Database.select_campaign(code)
+        campaign_data = self.database.select_campaign(code)
         if campaign_data:
             return {"campaign": campaign_data, "user_type": "player"}
         return {}
@@ -129,7 +121,7 @@ class Controller:
         :param category: Categoria do artefato.
         :return: True se artefato foi adicionado com sucesso, False caso contrário.
         """
-        artifact_added = Database.insert_artifact(campaign_code, name, desc, category)
+        artifact_added = self.database.insert_artifact(campaign_code, name, desc, category)
         return artifact_added
 
     def add_item_to_character(self, artifact_code: int, character_code: int) -> bool:
@@ -139,7 +131,7 @@ class Controller:
         :param character_code: Código do personagem.
         :return: True se o artefato foi adicionado com sucesso, False caso contrário.
         """
-        return Database.insert_artifact_in_inventory(character_code, artifact_code)
+        return self.database.insert_artifact_in_inventory(character_code, artifact_code)
 
     def remove_item_from_character(self, artifact_code: int, character_code: int) -> bool:
         """
@@ -148,4 +140,4 @@ class Controller:
         :param character_code: Código do personagem.
         :return: True se o artefato foi removido com sucesso, False caso contrário.
         """
-        return Database.delete_inventory(character_code, artifact_code)
+        return self.database.delete_inventory(character_code, artifact_code)
