@@ -42,6 +42,12 @@ class Route:
             return jsonify(campaigns), 200
         return jsonify({"msg": "Nenhuma campanha encontrada."}), 404
 
+    def get_campaign(self, id: int):
+        campaign = self.controller.get_campaign(id)
+        if campaign:
+            return jsonify(campaign), 200
+        return jsonify({"msg": "Nenhuma campanha encontrada."}), 404
+
     def create_campaign(self, name, desc, freq, img_link, user_id):
         """
         Rota para criar uma nova campanha.

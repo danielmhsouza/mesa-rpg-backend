@@ -44,6 +44,14 @@ def rt_campaigns():
         return jsonify({"error": "ID do usuário é obrigatório"}), 400
     return route.get_campaigns(user_id)
 
+@app.route('/campanha', methods=["GET"])
+def rt_campaign():
+    id = int(request.args.get('id'))
+    if not id:
+        return jsonify({"error": "Código da campanha obrigatório"}), 400
+    
+    return route.get_campaign(id)
+
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
     app.run(debug=True)

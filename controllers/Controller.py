@@ -53,6 +53,8 @@ class Controller:
 
     def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
         return self.database.select_campaigns(user_id)
+    def get_campaign(self, id: int):
+        return self.database.select_campaign(id)
 
     def insert_entry_campaign(self, code: int, character: List[str]) -> bool:
         """

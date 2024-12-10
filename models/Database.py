@@ -208,6 +208,22 @@ class Database:
             })
         return campaigns
 
+    def select_campaign(self, id: int):
+        query = db.query_campaigns['select']
+        campaign = self._execute_select_query(query, (id,))
+        user_name = self._execute_select_query('SELECT user_name FROM user WHERE user_id = %s', (campaign[0][1],))
+        
+        return {
+                    "campaign_id": campaign[0][0],
+                    "user_name": user_name,
+                    "name": campaign[0][2],
+                    "description": campaign[0][3],
+                    "freq": campaign[0][4],
+                    "img_link": campaign[0][5]
+                }
+
+
+
     # @staticmethod
     # def select_any_campaign(campaign_ids: list) -> Dict[str, Any]:
     #     """
