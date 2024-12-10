@@ -36,16 +36,11 @@ class Route:
             return jsonify({"message": "Usuário registrado com sucesso!"}), 200
         return jsonify({"error": "Erro ao registrar usuário"}), 500
 
-    def get_campaing_data_from_id(self, id: list):
-        if not id:
-            return jsonify({"error": "Necessário uma lista de campanhas!"}), 500
-        
-        if len(id) < 0:
-            return jsonify({"msg": "Não há campanhas"}), 200
-        
-        campaings = self.controller.get_campaing_data(id)
-        if campaings:
-            return jsonify(campaings), 200
+    def get_campaigns(self, user_id: int):
+        campaigns = self.controller.get_campaigns(user_id)
+        if campaigns:
+            return jsonify(campaigns), 200
+        return jsonify({"msg": "Nenhuma campanha encontrada."}), 404
 
     def create_campaign(self, name, desc, freq, img_link, user_id):
         """
