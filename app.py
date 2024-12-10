@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from routes.Route import Route
 from flask_cors import CORS
 
@@ -38,9 +38,11 @@ def rt_create_campaign():
     return route.create_campaign(name=name, desc=desc, freq=freq, img_link=img_link, user_id=user_id)
 
 @app.route('/campanhas-usuario', methods=["GET"])
-def rt_user_campaigns():
-    user_id = request.args.get('id')
-    return route.get_campaing_data_from_id(user_id)
+def rt_campaigns():
+    user_id = request.args.get('user_id')
+    if not user_id:
+        return jsonify({"error": "ID do usuário é obrigatório"}), 400
+    return route.get_campaigns(user_id)
 
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
