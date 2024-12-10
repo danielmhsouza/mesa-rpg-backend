@@ -59,11 +59,8 @@ class Controller:
             return True
         return False
 
-    def get_campaing_data(self, id: list):
-
-        campaings = Database.select_any_campaign(id)
-        
-        return campaings
+    def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
+        return Database.select_campaigns(user_id)
 
     def insert_entry_campaign(self, code: int, character: List[str]) -> bool:
         """
