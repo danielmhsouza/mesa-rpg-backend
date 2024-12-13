@@ -53,29 +53,12 @@ class Controller:
 
     def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
         return self.database.select_campaigns(user_id)
+  
     def get_campaign(self, id: int):
         return self.database.select_campaign(id)
 
-    def insert_entry_campaign(self, code: int, character: List[str]) -> bool:
-        """
-        Insere o usuário em uma campanha, criando personagens associados.
-        :param code: Código da campanha.
-        :param character: Dados do personagem a ser inserido.
-        :return: True se inserção bem-sucedida, False caso contrário.
-        """
-        try:
-            # Adiciona o usuário à campanha
-            self.user.insert_entry_campaign(code)
-            # Cria o personagem
-            character_code = self.database.insert_character(character)
-            self.user.insert_character(character_code)
-            # Atualiza os dados no banco
-            self.database.update_entry_campaign_user(code, self.user.get_id())
-            self.database.update_user_characters(character_code)
-            return True
-        except Exception as e:
-            print(f"Erro ao inserir entrada na campanha: {e}")
-            return False
+    def insert_entry_campaign(self, camp_id: int, user_id: List[str]) -> int:
+      return self.database.insert_entry_campaign(user_id, camp_id)
 
     def create_campaign(self, name: str, desc: str, freq: str, img_link: str, user_id: int) -> bool:
         """
@@ -91,6 +74,12 @@ class Controller:
             return True
         return False
 
+    def create_character(self, character: dict, id_camp: int, id_user: int) -> int:
+        return self.database.insert_character(character, id_camp, id_user)
+    
+    def delete_character(self, id: int):
+        self.database.delete_character(id)
+        
     def enter_campaign_as_master(self, code: int) -> Dict[str, Any]:
         """
         Entra em uma campanha como mestre, associando o usuário à campanha.

@@ -8,9 +8,11 @@ class Database:
         self._password: str = 'Ssswww#123'
         self._db_name: str = 'dansou481_spellboundtable'
         self._user: str = "dansou481_spellboundtable"
+        self._connect()
 
+    def _connect(self):
+        """Estabelece uma conexão com o banco de dados."""
         try:
-            # Estabelecendo a conexão
             self.db = mariadb.connect(
                 host=self._hostname,
                 port=3306,
@@ -23,7 +25,16 @@ class Database:
             print(f"Erro ao conectar ao MariaDB: {e}")
             self.db = None
 
-    def _execute_query(self, query: str, values:tuple=None) -> bool:
+    def _check_connection(self):
+        """Verifica se a conexão ainda está ativa, reconectando se necessário."""
+        try:
+            self.db.ping()  # Verifica se a conexão está ativa
+        except mariadb.Error:
+            print("Conexão perdida. Reconectando...")
+            self._connect()
+
+    def _execute_query(self, query: str, values: tuple = None) -> bool:
+        self._check_connection()
         try:
             mycursor = self.db.cursor()
             if values:
@@ -37,8 +48,9 @@ class Database:
             return False
         finally:
             mycursor.close()
-    
-    def _execute_select_query(self, query: str, values: tuple=None) -> list:
+
+    def _execute_select_query(self, query: str, values: tuple = None) -> list:
+        self._check_connection()
         try:
             mycursor = self.db.cursor()
             if values:
@@ -171,6 +183,19 @@ class Database:
             finally:
                 mycursor.close()
         return 0
+    
+    def insert_entry_campaign(self, user_id: int, campaign_id: int) -> int:
+
+        query = db.query_entry_campaign["register"]
+        values = (user_id, campaign_id)
+        if self._execute_query(query, values):
+            try:
+                mycursor = self.db.cursor()
+                mycursor.execute("SELECT LAST_INSERT_ID()")
+                return mycursor.fetchone()[0]
+            finally:
+                mycursor.close()
+        return 0
 
     def select_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
         """
@@ -222,28 +247,6 @@ class Database:
                     "img_link": campaign[0][5]
                 }
 
-
-
-    # @staticmethod
-    # def select_any_campaign(campaign_ids: list) -> Dict[str, Any]:
-    #     """
-    #     Seleciona uma campanha do banco de dados com base no ID da campanha.
-    #     :param campaign_id: ID da campanha a ser selecionada.
-    #     :return: Dicionário contendo as informações da campanha (ID, nome, descrição, frequência e link da imagem), ou um dicionário vazio se não encontrar a campanha.
-    #     """
-    #     query = "SELECT * FROM campaign WHERE campaign_id IN (%s)" % ','.join(map(str, campaign_ids))
-    #     result = self._execute_select_query(query)
-    #     if result:
-    #         return {
-    #             "campaign_id": result[0][0],
-    #             "user_id": result[0][1],
-    #             "name": result[0][2],
-    #             "description": result[0][3],
-    #             "freq": result[0][4],
-    #             "img_link": result[0][5]
-    #         }
-    #     return {}
-
     def update_campaign(self, campaign_data: Dict[str, Any]) -> bool:
         """
         Atualiza as informações de uma campanha no banco de dados.
@@ -279,20 +282,37 @@ class Database:
             print(f"Erro ao excluir campanha: {e}")
             return False
 
-
-    def insert_character(self, character_data: Dict[str, Any]) -> int:
+    def insert_character(self, character_data: dict, camp_id: int, user_id: int) -> int:
         """
         Insere um novo personagem no banco de dados e retorna o ID do personagem inserido.
         :param character_data: Dicionário contendo as informações do personagem (nome, classe, raça, atributos, etc.).
         :return: O ID do personagem inserido no banco de dados.
         """
         query = db.query_characters["register"]
+        default_money = 150
+        default_mana = 200
+        
         values = (
-            character_data['user_id'], character_data['campaign_id'], character_data['name'], character_data['class'],
-            character_data['img_link'], character_data['race'], character_data['money'], character_data['force'],
-            character_data['dest'], character_data['consti'], character_data['intel'], character_data['wisdom'],
-            character_data['charisma'], character_data['armor'], character_data['initi'], character_data['desloc'],
-            character_data['hp'], character_data['mana'], character_data['b_proef'], character_data['inspiration']
+            user_id, 
+            camp_id, 
+            character_data['name'][0], 
+            character_data['classe'],
+            character_data['img_link'], 
+            character_data['race'], 
+            default_money, 
+            character_data['force'],
+            character_data['destreza'], 
+            character_data['constituicao'], 
+            character_data['inteligencia'], 
+            character_data['sabedoria'],
+            character_data['carisma'], 
+            character_data['armadura'], 
+            character_data['iniciativa'], 
+            character_data['deslocamento'],
+            character_data['pontos_vida'], 
+            default_mana, 
+            character_data['bonus_proef'], 
+            character_data['inspiracao']
         )
         if self._execute_query(query, values):
             mycursor = self.db.cursor()

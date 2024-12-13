@@ -61,6 +61,19 @@ class Route:
             return jsonify({"message": "Campanha criada com sucesso!"}), 200
         return jsonify({"error": "Erro ao criar campanha"}), 500
 
+    def create_character(self, character: dict, id_camp: int, id_user: int):
+        character = self.controller.create_character(character, id_camp, id_user)
+        if character < 1:
+            return jsonify({"error": "Erro ao criar personagem!"}), 500
+        
+        campaign = self.controller.insert_entry_campaign(id_camp, id_user)
+        if campaign < 1:
+            self.controller.delete_character(character)
+            return jsonify({"error": "Erro ao entrar na campanha!"}), 500
+        
+        return jsonify({"message": f"Você entrou na campanha {campaign} com o personagem {character}!"}), 200
+        
+
     def enter_campaign_as_master(self):
         """
         Rota para o usuário entrar em uma campanha como mestre.

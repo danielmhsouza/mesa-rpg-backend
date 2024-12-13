@@ -31,7 +31,7 @@ CREATE TABLE `character` (
     class varchar(50) NOT NULL,
     img_link text NOT NULL,
     race varchar(20) NOT NULL,
-    money float NOT NULL,
+    `money` float NOT NULL,
     `force` int NOT NULL,
     dest int NOT NULL,
     consti int NOT NULL,
@@ -42,6 +42,7 @@ CREATE TABLE `character` (
     initi int NOT NULL,
     desloc int NOT NULL,
     hp int NOT NULL,
+    mana int NOT NULL,
     b_proef int NOT NULL,
     inspiration int NOT NULL,
 

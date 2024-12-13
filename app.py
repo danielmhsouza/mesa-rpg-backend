@@ -52,6 +52,30 @@ def rt_campaign():
     
     return route.get_campaign(id)
 
+@app.route('/criar-personagem', methods=['POST'])
+def rt_create_character():
+    data = request.get_json()
+    character = {
+        "name": ["name"],
+        "race": data["race"],
+        "classe": data["classe"],
+        "img_link": data["img_link"],
+        "force": data["force"],
+        "carisma": data["carisma"],
+        "destreza": data["destreza"],
+        "constituicao": data["constituicaio"],
+        "inteligencia": data["inteligencia"],
+        "sabedoria": data["sabedoria"],
+        "armadura": data["armadura"],
+        "iniciativa": data["iniciativa"],
+        "deslocamento": data["deslocamento"],
+        "pontos_vida": data["pontos_vida"],
+        "bonus_proef": data["bonus_proef"],
+        "inspiracao": data["inspiracao"]
+    }
+    id_camp = data["camp_id"]
+    id_user = data["user_id"]
+    return route.create_character(character, id_camp, id_user)
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
     app.run(debug=True)
