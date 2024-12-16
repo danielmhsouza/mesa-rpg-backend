@@ -28,6 +28,7 @@ CREATE TABLE `character` (
     user_id int NOT NULL,
     campaign_id int NOT NULL,
     name varchar(50) NOT NULL,
+    `level` int NOT NULL DEFAULT 1,
     class varchar(50) NOT NULL,
     img_link text NOT NULL,
     race varchar(20) NOT NULL,
@@ -49,7 +50,6 @@ CREATE TABLE `character` (
     CONSTRAINT `pk_character` PRIMARY KEY(character_id),
     CONSTRAINT `fk_user_id` FOREIGN KEY (user_id) REFERENCES user(user_id),
     CONSTRAINT `fk_campaign_id` FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id)
-
 );
 
 CREATE TABLE artifact (

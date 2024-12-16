@@ -56,7 +56,7 @@ def rt_campaign():
 def rt_create_character():
     data = request.get_json()
     character = {
-        "name": ["name"],
+        "name": data["name"],
         "race": data["race"],
         "classe": data["classe"],
         "img_link": data["img_link"],
@@ -76,6 +76,24 @@ def rt_create_character():
     id_camp = data["camp_id"]
     id_user = data["user_id"]
     return route.create_character(character, id_camp, id_user)
+
+@app.route('/personagem', methods=['GET'])
+def rt_get_personagem():
+    campaign_id = request.args.get("campaign_id")
+    user_id = request.args.get("user_id")
+
+    # Validação dos parâmetros
+    if not campaign_id or not user_id:
+        return jsonify({"error": "Parâmetros 'campaign_id' e 'user_id' são obrigatórios"}), 400
+
+    try:
+        campaign_id = int(campaign_id)
+        user_id = int(user_id)
+    except ValueError:
+        return jsonify({"error": "Parâmetros devem ser números inteiros"}), 400
+
+    return route.get_character(campaign_id, user_id)
+
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
     app.run(debug=True)

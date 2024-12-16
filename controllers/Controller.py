@@ -76,7 +76,10 @@ class Controller:
 
     def create_character(self, character: dict, id_camp: int, id_user: int) -> int:
         return self.database.insert_character(character, id_camp, id_user)
-    
+
+    def get_characters_by_campaign_and_user(self, campaign_id: int, user_id: int):
+        return self.database.select_character_by_campaign_and_user(campaign_id, user_id)
+
     def delete_character(self, id: int):
         self.database.delete_character(id)
         

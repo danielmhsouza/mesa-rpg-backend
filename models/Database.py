@@ -291,11 +291,13 @@ class Database:
         query = db.query_characters["register"]
         default_money = 150
         default_mana = 200
+        default_level = 1
         
         values = (
             user_id, 
             camp_id, 
-            character_data['name'][0], 
+            character_data['name'],
+            default_level,
             character_data['classe'],
             character_data['img_link'], 
             character_data['race'], 
@@ -329,31 +331,72 @@ class Database:
         query = db.query_characters["select"]
         values = (character_id,)
         result = self._execute_select_query(query, values)
+
         if result:
             return {
                 "character_id": result[0][0],
                 "user_id": result[0][1],
                 "campaign_id": result[0][2],
                 "name": result[0][3],
-                "class": result[0][4],
-                "img_link": result[0][5],
-                "race": result[0][6],
-                "money": result[0][7],
-                "force": result[0][8],
-                "dest": result[0][9],
-                "consti": result[0][10],
-                "intel": result[0][11],
-                "wisdom": result[0][12],
-                "charisma": result[0][13],
-                "armor": result[0][14],
-                "initi": result[0][15],
-                "desloc": result[0][16],
-                "hp": result[0][17],
-                "mana": result[0][18],
-                "b_proef": result[0][19],
-                "inspiration": result[0][20]
+                "level": result[0][4],
+                "class": result[0][5],
+                "img_link": result[0][6],
+                "race": result[0][7],
+                "money": result[0][8],
+                "force": result[0][9],
+                "dest": result[0][10],
+                "consti": result[0][11],
+                "intel": result[0][12],
+                "wisdom": result[0][13],
+                "charisma": result[0][14],
+                "armor": result[0][15],
+                "initi": result[0][16],
+                "desloc": result[0][17],
+                "hp": result[0][18],
+                "mana": result[0][19],
+                "b_proef": result[0][20],
+                "inspiration": result[0][21]
             }
         return {}
+
+    def select_character_by_campaign_and_user(self, campaign_id: int, user_id: int) -> list:
+        """
+        Busca personagens de um usuário em uma campanha específica.
+        :param campaign_id: ID da campanha.
+        :param user_id: ID do usuário.
+        :return: Lista de personagens encontrados.
+        """
+        query = db.query_characters["select_by_campaign_user"]
+        values = (campaign_id, user_id)
+        result = self._execute_select_query(query, values)
+
+        characters = []
+        for row in result:
+            characters.append({
+                "character_id": row[0],
+                "user_id": row[1],
+                "campaign_id": row[2],
+                "name": row[3],
+                "level": row[4],
+                "class": row[5],
+                "img_link": row[6],
+                "race": row[7],
+                "money": row[8],
+                "force": row[9],
+                "dest": row[10],
+                "consti": row[11],
+                "intel": row[12],
+                "wisdom": row[13],
+                "charisma": row[14],
+                "armor": row[15],
+                "initi": row[16],
+                "desloc": row[17],
+                "hp": row[18],
+                "mana": row[19],
+                "b_proef": row[20],
+                "inspiration": row[21]
+            })
+        return characters
 
     def update_character(self, character_data: Dict[str, Any]) -> bool:
         """
