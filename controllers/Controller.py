@@ -73,8 +73,15 @@ class Controller:
                                              artifact_data["category"])
 
     def get_artifacts(self, campaign_id: int):
-        return self.campaign.master.artifact.get_artifacts(campaign_id)
-        
+        """
+        Busca artefatos de uma campanha específica.
+        """
+        try:
+            return self.campaign.master.artifact.get_artifacts(campaign_id)
+        except Exception as e:
+            print(f"Erro ao buscar artefatos no controller: {e}")
+            return None
+
     #--########
     
     #--##### CHARACTER METHODS

@@ -5,6 +5,7 @@ class Master:
 
    def __init__(self):
        self.database = Database()
+       self.artifact = Artifact()
 
 
 

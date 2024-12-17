@@ -22,7 +22,7 @@ class Artifact:
         """
         try:
             params = (campaign_id,)
-            result = self.database.execute_query(self.query['select'], params)
+            result = self.database.execute_select_query(self.query['select'], params)
 
             artifacts = [
                 {

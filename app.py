@@ -108,18 +108,13 @@ def rt_get_artifacts():
     """
     Rota para buscar artefatos (itens ou missões) de uma campanha específica.
     """
+    campaign_id = request.args.get("campaign_id")
+    if not campaign_id:
+        return jsonify({"error": "O ID da campanha é obrigatório"}), 400
+
     try:
-        campaign_id = request.args.get("campaign_id")
-
-        if not campaign_id:
-            return jsonify({"error": "O ID da campanha é obrigatório"}), 400
-
-        artifacts = route.get_artifacts(int(campaign_id))
-
-        if artifacts:
-            return jsonify({"artifacts": artifacts}), 200
-        else:
-            return jsonify({"message": "Nenhum artefato encontrado para esta campanha."}), 404
+        campaign_id = int(campaign_id)
+        return route.get_artifacts(campaign_id)
 
     except Exception as e:
         print(f"Erro ao buscar artefatos: {e}")

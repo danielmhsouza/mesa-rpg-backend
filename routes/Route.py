@@ -140,8 +140,9 @@ class Route:
             return jsonify({"error": "Parâmetro 'campaign_id' é obrigatório"}), 500
         artifacts = self.controller.get_artifacts(campaign_id)
         if artifacts:
-            return jsonify({"characters": artifacts}), 200
-        return jsonify({"message": "Nenhum personagem encontrado"}), 500
+            return jsonify({"artifacts": artifacts}), 200
+        return jsonify({"error": "Erro ao buscar artefatos."}), 500
+
 
     def add_item_to_character(self):
         """
