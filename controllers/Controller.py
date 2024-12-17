@@ -7,11 +7,13 @@ from models.Database import Database
 
 class Controller:
     def __init__(self):
-        self.user = None
-        self.campaign = None
+        self.user = User()
+        self.campaign = Campaign()
         self.master = None
         self.database = Database()
 
+    ###### USER METHODS
+    
     def login(self, email: str, password: str) -> Dict[str, Any]:
         """
         Realiza o login do usuário, verifica no banco de dados e retorna os dados do usuário.
@@ -19,7 +21,7 @@ class Controller:
         :param password: Senha do usuário.
         :return: Dados do usuário, ou dicionário vazio se não encontrado.
         """
-        user_data = self.database.select_user(email, password)
+        user_data = self.user.select_user(email, password)
         if user_data:
             return user_data
         return {}
@@ -44,38 +46,39 @@ class Controller:
             "password": password
         }
 
-        user_id = self.database.insert_user(user_data)
+        user_id = self.user.insert_user(user_data)
         print(f"\n\n Database response: {user_id} \n\n")
         if user_id:
             self.user = User(user_id, user_name, email, password, [], [], [])
             return True
         return False
 
-    def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
-        return self.database.select_campaigns(user_id)
-  
-    def get_campaign(self, id: int):
-        return self.database.select_campaign(id)
+ 
+    #########
 
-    def insert_entry_campaign(self, camp_id: int, user_id: List[str]) -> int:
-      return self.database.insert_entry_campaign(user_id, camp_id)
+    ###### CAMPAIGN METHODS
 
     def create_campaign(self, name: str, desc: str, freq: str, img_link: str, user_id: int) -> bool:
-        """
-        Cria uma nova campanha no banco de dados.
-        :param name: Nome da campanha.
-        :param desc: Descrição da campanha.
-        :param freq: Frequência da campanha.
-        :param img_link: Link para imagem da campanha.
-        :return: True se a campanha foi criada com sucesso, False caso contrário.
-        """
-        created_campaign_code = self.database.insert_campaign(name, desc, freq, img_link, user_id)
+
+        created_campaign_code = self.campaign.insert_campaign(name, desc, freq, img_link, user_id)
         if created_campaign_code > 0:
             return True
         return False
-
+    
     def create_character(self, character: dict, id_camp: int, id_user: int) -> int:
-        return self.database.insert_character(character, id_camp, id_user)
+        return self.campaign.character.insert_character(character, id_camp, id_user)
+    
+    def insert_entry_campaign(self, id_camp: int, id_user: int):
+        return self.campaign.insert_entry_campaign(id_user, id_camp)
+    
+    def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
+        return self.campaign.select_campaigns(user_id)
+  
+    def get_campaign(self, id: int):
+        return self.campaign.select_campaign(id)
+    
+    
+    #########
 
     def get_characters_by_campaign_and_user(self, campaign_id: int, user_id: int):
         return self.database.select_character_by_campaign_and_user(campaign_id, user_id)
