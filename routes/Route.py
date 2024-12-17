@@ -85,54 +85,11 @@ class Route:
             return jsonify({"characters": character}), 200
         return jsonify({"message": "Nenhum personagem encontrado"}), 500
 
-    def enter_campaign_as_master(self):
-        """
-        Rota para o usuário entrar em uma campanha como mestre.
-        :return: Resposta JSON com o status da operação.
-        """
-        data = request.get_json()
-        code = data.get('code')
 
-        if not code:
-            return jsonify({"error": "Código da campanha é obrigatório"}), 400
-
-        campaign_data = self.controller.enter_campaign_as_master(code)
-        if campaign_data:
-            return jsonify(campaign_data), 200
-        return jsonify({"error": "Erro ao entrar na campanha como mestre"}), 500
-
-    def enter_campaign_as_player(self):
-        """
-        Rota para o usuário entrar em uma campanha como jogador.
-        :return: Resposta JSON com o status da operação.
-        """
-        data = request.get_json()
-        code = data.get('code')
-
-        if not code:
-            return jsonify({"error": "Código da campanha é obrigatório"}), 400
-
-        campaign_data = self.controller.enter_campaign_as_player(code)
-        if campaign_data:
-            return jsonify(campaign_data), 200
-        return jsonify({"error": "Erro ao entrar na campanha como jogador"}), 500
-
-    def add_artifact(self):
-        """
-        Rota para adicionar um artefato à campanha.
-        :return: Resposta JSON com o status da operação.
-        """
-        data = request.get_json()
-        campaign_code = data.get('campaign_code')
-        name = data.get('name')
-        desc = data.get('desc')
-        category = data.get('category')
-
-        if not campaign_code or not name or not desc or not category:
-            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+    def add_artifact(self, campaign_code: int, name: str, desc: str, category: int):
 
         if self.controller.add_artifact_to_campaign(campaign_code, name, desc, category):
-            return jsonify({"message": "Artefato adicionado com sucesso!"}), 201
+            return jsonify({"message": "Artefato adicionado com sucesso!"}), 200
         return jsonify({"error": "Erro ao adicionar artefato"}), 500
 
     def get_artifacts(self, campaign_id: int):

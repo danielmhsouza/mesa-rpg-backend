@@ -6,7 +6,7 @@ class Artifact:
     def __init__(self):
         self.database = Database()
         self.query = {
-            "register": "INSERT INTO artifact (campaign_id, name, desc, category) VALUES (%s, %s, %s, %s)",
+            "register": "INSERT INTO artifact (campaign_id, name, `desc`, category) VALUES (%s, %s, %s, %s)",
             "select": "SELECT artifact_id, name, `desc`, category FROM artifact WHERE campaign_id = %s",
             "update": "UPDATE artifact SET name = %s, desc = %s, category = %s WHERE artifact_id = %s",
             "delete": "DELETE FROM artifact WHERE artifact_id = %s",
