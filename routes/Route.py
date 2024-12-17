@@ -135,6 +135,14 @@ class Route:
             return jsonify({"message": "Artefato adicionado com sucesso!"}), 201
         return jsonify({"error": "Erro ao adicionar artefato"}), 500
 
+    def get_artifacts(self, campaign_id: int):
+        if not campaign_id:
+            return jsonify({"error": "Parâmetro 'campaign_id' é obrigatório"}), 500
+        artifacts = self.controller.get_artifacts(campaign_id)
+        if artifacts:
+            return jsonify({"characters": artifacts}), 200
+        return jsonify({"message": "Nenhum personagem encontrado"}), 500
+
     def add_item_to_character(self):
         """
         Rota para adicionar um artefato ao personagem.
