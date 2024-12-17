@@ -78,6 +78,9 @@ class Controller:
     def add_artifact_to_campaign(self, artifact_data: dict) -> bool:
         return self.campaign.master.artifact.insert_artifact(artifact_data["campaign_id"], artifact_data["name"], artifact_data["desc"],
                                              artifact_data["category"])
+
+    def get_artifacts(self, campaign_id: int):
+        return self.campaign.master.artifact.get_artifacts(campaign_id)
     
         ###### CHARACTER METHODS
 

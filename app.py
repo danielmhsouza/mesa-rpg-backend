@@ -94,6 +94,29 @@ def rt_get_personagem():
 
     return route.get_character(campaign_id, user_id)
 
+@app.route('/artefato', methods=['GET'])
+def rt_get_artifacts():
+    """
+    Rota para buscar artefatos (itens ou missões) de uma campanha específica.
+    """
+    try:
+        campaign_id = request.args.get("campaign_id")
+
+        if not campaign_id:
+            return jsonify({"error": "O ID da campanha é obrigatório"}), 400
+
+        artifacts = route.get_artifacts(int(campaign_id))
+
+        if artifacts:
+            return jsonify({"artifacts": artifacts}), 200
+        else:
+            return jsonify({"message": "Nenhum artefato encontrado para esta campanha."}), 404
+
+    except Exception as e:
+        print(f"Erro ao buscar artefatos: {e}")
+        return jsonify({"error": "Erro interno do servidor"}), 500
+
+
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
     app.run(debug=True)
