@@ -1,9 +1,10 @@
 from .Database import Database
-
+from .Inventory import Inventory
 class Character:
     
     def __init__(self):
         self.database = Database()
+        self.inventory = Inventory()
         self.query = {
             "register": "INSERT INTO `character` (user_id, campaign_id, name, level, class, img_link, race, `money`, `force`, dest, consti, intel, wisdom, charisma, armor, initi, desloc, hp, mana, b_proef, inspiration) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             "select": "SELECT * FROM character WHERE character_id = %s",

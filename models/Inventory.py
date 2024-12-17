@@ -1,37 +1,33 @@
+from . import Database
+
 class Inventory:
-    def __init__(self, character_id: int):
-        self.character_id = character_id
-        self.artifacts = self.load_artifacts_from_db()
+    
+    def __init__(self):
+        self.database = Database()
+        self.query = {
+            "register": "INSERT INTO inventory (character_id, artifact_id) VALUES (%s, %s)",
+            "select": "SELECT artifact_id FROM inventory WHERE character_id = %s",
+            "delete": "DELETE FROM inventory WHERE character_id = %s AND artifact_id = %s",
+        }
 
-    def load_artifacts_from_db(self):
-        """Carrega todos os artefatos associados a este personagem do banco de dados."""
-        return Database.select_inventory(self.character_id)
+    def insert_item(self, character_id: int, item_id: int):
+        values = (character_id, item_id)
+        return self.database.execute_query(self.query["register"], values)
+    
+    def show_items(self, character_id: int):
+        value = (character_id,)
+        result = self.database.execute_select_query(self.query["select"], value)
+        items = []
+        for row in result:
+            items.append(row[0])
 
-    def add_artifact(self, artifact, index: int) -> bool:
-        """
-        Adiciona um artefato ao inventário na posição especificada pelo índice.
-        :param artifact: O artefato a ser adicionado.
-        :param index: O índice onde o artefato será adicionado.
-        :return: Retorna True se o artefato foi adicionado com sucesso, False caso contrário.
-        """
-        if 0 <= index <= len(self.artifacts):
-            self.artifacts.insert(index, artifact)
-            if Database.insert_inventory(self.character_id, artifact.artifact_id):
-                return True
-            else:
-                self.artifacts.remove(artifact)
-        return False
+        artifacts = self.database.execute_select_query("SELECT * FROM artifact WHERE artifact_id IN (%s)", tuple(items))
+        response = []
 
-    def drop_artifact(self, index: int) -> bool:
-        """
-        Remove um artefato do inventário na posição especificada pelo índice.
-        :param index: O índice do artefato a ser removido.
-        :return: Retorna True se o artefato foi removido com sucesso, False caso contrário.
-        """
-        if 0 <= index < len(self.artifacts):
-            artifact = self.artifacts.pop(index)
-            if Database.delete_inventory(self.character_id, artifact.artifact_id):
-                return True
-            else:
-                self.artifacts.insert(index, artifact)
-        return False
+        for row in artifacts:
+            response.append({
+                "name": row[2],
+                "desc": row[3]
+            })
+        return response
+        

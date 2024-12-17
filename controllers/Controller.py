@@ -95,6 +95,11 @@ class Controller:
     def get_all_character_by_campaign(self, campaign_id):
         return self.campaign.character.select_characters_by_campaign(campaign_id)
     
+    def add_intem_to_inventory(self, character_id: int, artefact_id: int):
+        return self.campaign.character.inventory.insert_item(character_id, artefact_id)
+    
+    def get_inventory(self, character_id: int):
+        return self.campaign.character.inventory.show_items(character_id)
     #--########
 
     #########

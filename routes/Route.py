@@ -100,37 +100,20 @@ class Route:
             return jsonify({"artifacts": artifacts}), 200
         return jsonify({"error": "Erro ao buscar artefatos."}), 500
 
+    def add_intem_to_inventory(self, character_id: int, artefact_id: int):
+        if (character_id < 1) or (artefact_id < 1):
+            return jsonify({"error": "IDs obrigatórios."}), 500
 
-    def add_item_to_character(self):
-        """
-        Rota para adicionar um artefato ao personagem.
-        :return: Resposta JSON com o status da operação.
-        """
-        data = request.get_json()
-        artifact_code = data.get('artifact_code')
-        character_code = data.get('character_code')
+        response = self.controller.add_intem_to_inventory(character_id, artefact_id)
+        if response:
+            return jsonify(response), 200
+        return jsonify({"Erro": "Impossível adicionar item ao inventário."}), 500
 
-        if not artifact_code or not character_code:
-            return jsonify({"error": "Código do artefato e personagem são obrigatórios"}), 400
-
-        if self.controller.add_item_to_character(artifact_code, character_code):
-            return jsonify({"message": "Item adicionado ao personagem com sucesso!"}), 200
-        return jsonify({"error": "Erro ao adicionar item ao personagem"}), 500
-
-    def remove_item_from_character(self):
-        """
-        Rota para remover um artefato do inventário do personagem.
-        :return: Resposta JSON com o status da operação.
-        """
-        data = request.get_json()
-        artifact_code = data.get('artifact_code')
-        character_code = data.get('character_code')
-
-        if not artifact_code or not character_code:
-            return jsonify({"error": "Código do artefato e personagem são obrigatórios"}), 400
-
-        if self.controller.remove_item_from_character(artifact_code, character_code):
-            return jsonify({"message": "Item removido do personagem com sucesso!"}), 200
-        return jsonify({"error": "Erro ao remover item do personagem"}), 500
-
-
+    def get_inventory(self, character_id: int):
+        if not character_id:
+            return jsonify({"error": "IDs obrigatórios."}), 500
+        
+        response = self.controller.get_inventory(character_id)
+        if response:
+            return jsonify(response), 200
+        return jsonify({"Erro": "Impossível mostrar inventário"})

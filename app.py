@@ -129,6 +129,19 @@ def rt_get_artifacts():
         print(f"Erro ao buscar artefatos: {e}")
         return jsonify({"error": "Erro interno do servidor"}), 500
 
+@app.route('/artefato-jogador', methods=['POST', 'GET'])
+def rt_artifact_player():
+
+
+    if request.method == 'POST':
+        data = request.get_json()
+        character_id = data["character_id"]
+        artefact_id = data["artefact_id"]
+        return route.add_intem_to_inventory(character_id, artefact_id)
+    
+    character_id = request.args.get("character_id")
+    return route.get_inventory(character_id=character_id)
+    
 
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
