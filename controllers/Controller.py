@@ -27,14 +27,7 @@ class Controller:
         return {}
 
     def register(self, user_name: str, email: str, password: str, confirm_password: str) -> bool:
-        """
-        Realiza o cadastro de um novo usuário.
-        :param user_name: Nome do usuário.
-        :param email: E-mail do usuário.
-        :param password: Senha do usuário.
-        :param confirm_password: Confirmação da senha.
-        :return: True se o cadastro foi bem-sucedido, False caso contrário.
-        """
+
         if password != confirm_password:
             return False  # Senha não confere
         if len(password) < 6:
@@ -49,7 +42,6 @@ class Controller:
         user_id = self.user.insert_user(user_data)
         print(f"\n\n Database response: {user_id} \n\n")
         if user_id:
-            self.user = User(user_id, user_name, email, password, [], [], [])
             return True
         return False
 
@@ -93,47 +85,3 @@ class Controller:
         #########
 
     #########
-
-    def delete_character(self, id: int):
-        self.database.delete_character(id)
-        
-    def enter_campaign_as_master(self, code: int) -> Dict[str, Any]:
-        """
-        Entra em uma campanha como mestre, associando o usuário à campanha.
-        :param code: Código da campanha.
-        :return: Dados da campanha e tipo de usuário (mestre).
-        """
-        campaign_data = self.database.select_campaign(code)
-        if campaign_data:
-            self.master = Master(self.user.get_name(), campaign_data["campaign_id"])
-            return {"campaign": campaign_data, "user_type": "master"}
-        return {}
-
-    def enter_campaign_as_player(self, code: int) -> Dict[str, Any]:
-        """
-        Entra em uma campanha como jogador, associando o usuário à campanha.
-        :param code: Código da campanha.
-        :return: Dados da campanha e tipo de usuário (jogador).
-        """
-        campaign_data = self.database.select_campaign(code)
-        if campaign_data:
-            return {"campaign": campaign_data, "user_type": "player"}
-        return {}
-
-    def add_item_to_character(self, artifact_code: int, character_code: int) -> bool:
-        """
-        Adiciona um artefato ao inventário de um personagem.
-        :param artifact_code: Código do artefato.
-        :param character_code: Código do personagem.
-        :return: True se o artefato foi adicionado com sucesso, False caso contrário.
-        """
-        return self.database.insert_artifact_in_inventory(character_code, artifact_code)
-
-    def remove_item_from_character(self, artifact_code: int, character_code: int) -> bool:
-        """
-        Remove um artefato do inventário de um personagem.
-        :param artifact_code: Código do artefato.
-        :param character_code: Código do personagem.
-        :return: True se o artefato foi removido com sucesso, False caso contrário.
-        """
-        return self.database.delete_inventory(character_code, artifact_code)

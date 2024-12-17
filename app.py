@@ -7,6 +7,15 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "P
 app.config['CORS_HEADERS'] = 'Content-Type'
 route = Route()
 
+@app.before_request
+def handle_options():
+    if request.method == "OPTIONS":
+        response = jsonify({"message": "CORS OK"})
+        response.headers["Access-Control-Allow-Origin"] = "*"
+        response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+        response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+        return response, 200
+
 @app.route('/cadastro', methods=['POST'])
 def rt_register():
     data = request.get_json()
