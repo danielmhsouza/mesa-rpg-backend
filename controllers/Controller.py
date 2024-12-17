@@ -67,14 +67,17 @@ class Controller:
     def get_campaign(self, id: int):
         return self.campaign.select_campaign(id)
 
+    #--##### MASTER METHODS
     def add_artifact_to_campaign(self, artifact_data: dict) -> bool:
         return self.campaign.master.artifact.insert_artifact(artifact_data["campaign_id"], artifact_data["name"], artifact_data["desc"],
                                              artifact_data["category"])
 
     def get_artifacts(self, campaign_id: int):
         return self.campaign.master.artifact.get_artifacts(campaign_id)
+        
+    #--########
     
-        ###### CHARACTER METHODS
+    #--##### CHARACTER METHODS
 
     def create_character(self, character: dict, id_camp: int, id_user: int) -> int:
         return self.campaign.character.insert_character(character, id_camp, id_user)
@@ -85,6 +88,7 @@ class Controller:
     
     def get_all_character_by_campaign(self, campaign_id):
         return self.campaign.character.select_characters_by_campaign(campaign_id)
-        #########
+    
+    #--########
 
     #########
