@@ -1,11 +1,13 @@
 from .Database import Database
 from .Character import Character
+from .Master import Master
 
 class Campaign:
    
     def __init__(self):
         self.database = Database()
         self.character = Character()
+        self.master = Master()
         self.query = {
             "register": "INSERT INTO campaign (user_id, name, description, freq, img_link) VALUES (%s, %s, %s, %s, %s)",
             "select": "SELECT * FROM campaign WHERE campaign_id = %s",

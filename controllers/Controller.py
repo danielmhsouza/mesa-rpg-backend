@@ -74,6 +74,10 @@ class Controller:
   
     def get_campaign(self, id: int):
         return self.campaign.select_campaign(id)
+
+    def add_artifact_to_campaign(self, artifact_data: dict) -> bool:
+        return self.campaign.master.artifact.insert_artifact(artifact_data["campaign_id"], artifact_data["name"], artifact_data["desc"],
+                                             artifact_data["category"])
     
         ###### CHARACTER METHODS
 
@@ -115,18 +119,6 @@ class Controller:
         if campaign_data:
             return {"campaign": campaign_data, "user_type": "player"}
         return {}
-
-    def add_artifact_to_campaign(self, campaign_code: int, name: str, desc: str, category: str) -> bool:
-        """
-        Adiciona um artefato à campanha.
-        :param campaign_code: Código da campanha.
-        :param name: Nome do artefato.
-        :param desc: Descrição do artefato.
-        :param category: Categoria do artefato.
-        :return: True se artefato foi adicionado com sucesso, False caso contrário.
-        """
-        artifact_added = self.database.insert_artifact(campaign_code, name, desc, category)
-        return artifact_added
 
     def add_item_to_character(self, artifact_code: int, character_code: int) -> bool:
         """
