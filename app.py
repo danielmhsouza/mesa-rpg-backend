@@ -78,7 +78,7 @@ def rt_create_character():
     return route.create_character(character, id_camp, id_user)
 
 @app.route('/personagem', methods=['GET'])
-def rt_get_personagem():
+def rt_get_character():
     campaign_id = request.args.get("campaign_id")
     user_id = request.args.get("user_id")
 
@@ -94,6 +94,43 @@ def rt_get_personagem():
 
     return route.get_character(campaign_id, user_id)
 
+@app.route('/artefato', methods=['POST', 'GET'])
+def rt_artifact():
+    if request.method == 'POST':
+        # Criar artefato (item ou missão)
+        data = request.get_json()
+        name = data.get("name")
+        description = data.get("description")
+        category = data.get("category")
+        campaign_id = data.get("campaign_id")
+
+        if not name or not description or category is None or not campaign_id:
+            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+
+        success = route.create_artifact(name, description, category, campaign_id)
+        if success:
+            return jsonify({"message": "Artefato criado com sucesso!"}), 200
+        return jsonify({"error": "Erro ao criar artefato"}), 500
+
+    elif request.method == 'GET':
+        # Listar artefatos de uma campanha
+        campaign_id = request.args.get("campaign_id")
+
+        if not campaign_id:
+            return jsonify({"error": "O ID da campanha é obrigatório"}), 400
+
+        try:
+            campaign_id = int(campaign_id)
+        except ValueError:
+            return jsonify({"error": "ID da campanha deve ser um número válido"}), 400
+
+        artifacts = route.get_artifacts(campaign_id)
+        if artifacts:
+            return jsonify({"artifacts": artifacts}), 200
+        return jsonify({"error": "Erro ao buscar artefatos."}), 500
+
+
+
 # Executa a aplicação se for o arquivo principal
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True, port=5001)

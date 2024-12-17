@@ -5,7 +5,7 @@ class Route:
     def __init__(self):
         self.controller = Controller()
 
-    
+
     def login(self, email, password):
         """
         Rota de login, onde o usuário envia e-mail e senha para autenticação.
@@ -28,7 +28,7 @@ class Route:
 
         if not user_name or not email or not password or not confirm_password:
             return jsonify({"error": "Todos os campos são obrigatórios"}), 500
-        
+
         if password != confirm_password:
             return jsonify({"error": "As senhas não coincidem"}), 500
 
@@ -65,14 +65,14 @@ class Route:
         character = self.controller.create_character(character, id_camp, id_user)
         if character < 1:
             return jsonify({"error": "Erro ao criar personagem!"}), 500
-        
+
         campaign = self.controller.insert_entry_campaign(id_camp, id_user)
         if campaign < 1:
             self.controller.delete_character(character)
             return jsonify({"error": "Erro ao entrar na campanha!"}), 500
-        
+
         return jsonify({"message": f"Você entrou na campanha {campaign} com o personagem {character}!"}), 200
-        
+
     def get_character(self, campaign_id: int, user_id: int):
         if not campaign_id or not user_id:
             return jsonify({"error": "Parâmetros 'campaign_id' e 'user_id' são obrigatórios"}), 500
@@ -113,23 +113,20 @@ class Route:
             return jsonify(campaign_data), 200
         return jsonify({"error": "Erro ao entrar na campanha como jogador"}), 500
 
-    def add_artifact(self):
-        """
-        Rota para adicionar um artefato à campanha.
-        :return: Resposta JSON com o status da operação.
-        """
-        data = request.get_json()
-        campaign_code = data.get('campaign_code')
-        name = data.get('name')
-        desc = data.get('desc')
-        category = data.get('category')
+    def create_artifact(self, name: str, description: str, category: int, campaign_id: int) -> bool:
+        artifact_data = {
+            "name": name,
+            "desc": description,
+            "category": category,
+            "campaign_id": campaign_id
+        }
+        return self.controller.add_artifact_to_campaign(artifact_data)
 
-        if not campaign_code or not name or not desc or not category:
-            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
-
-        if self.controller.add_artifact_to_campaign(campaign_code, name, desc, category):
-            return jsonify({"message": "Artefato adicionado com sucesso!"}), 201
-        return jsonify({"error": "Erro ao adicionar artefato"}), 500
+    # def get_artifacts(self, campaign_id: int):
+    #     artifacts_data = self.controller.get_artifacts_by_campaign(campaign_id)
+    #     if artifacts_data:
+    #         return jsonify(artifacts_data), 200
+    #     return jsonify({"error": "Erro ao buscar artefatos."}), 500
 
     def add_item_to_character(self):
         """
@@ -162,5 +159,4 @@ class Route:
         if self.controller.remove_item_from_character(artifact_code, character_code):
             return jsonify({"message": "Item removido do personagem com sucesso!"}), 200
         return jsonify({"error": "Erro ao remover item do personagem"}), 500
-
 

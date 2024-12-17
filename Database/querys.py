@@ -14,7 +14,7 @@ query_campaigns = {
 
 query_characters = {
     "register": "INSERT INTO `character` (user_id, campaign_id, name, level, class, img_link, race, `money`, `force`, dest, consti, intel, wisdom, charisma, armor, initi, desloc, hp, mana, b_proef, inspiration) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
-    "select": "SELECT * FROM character WHERE character_id = %s",
+    "select_all": "SELECT * FROM `character` WHERE campaign_id = %s",
     "update": "UPDATE character SET name = %s, class = %s, img_link = %s, race = %s, money = %s, force = %s, dest = %s, consti = %s, intel = %s, wisdom = %s, charisma = %s, armor = %s, init = %s, desloc = %s, hp = %s, bProef = %s, inspiration = %s WHERE character_id = %s",
     "delete": "DELETE FROM character WHERE character_id = %s",
     "select_ids": "SELECT character_id FROM `character` WHERE user_id = %s",
@@ -22,7 +22,7 @@ query_characters = {
 }
 
 query_artifacts = {
-    "register": "INSERT INTO artifact (campaign_id, name, desc, category) VALUES (%s, %s, %s, %s)",
+    "register": "INSERT INTO artifact (campaign_id, name, `desc`, category) VALUES (%s, %s, %s, %s)",
     "select": "SELECT * FROM artifact WHERE campaign_id = %s",
     "update": "UPDATE artifact SET name = %s, desc = %s, category = %s WHERE artifact_id = %s",
     "delete": "DELETE FROM artifact WHERE artifact_id = %s",

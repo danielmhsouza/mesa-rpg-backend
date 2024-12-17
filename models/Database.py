@@ -468,7 +468,7 @@ class Database:
         return self._execute_query(query, values)
 
     #Funções de Artefato
-    def insert_artifact(self, campaign_id: int, name: str, desc: str, category: str) -> bool:
+    def insert_artifact(self, campaign_id: int, name: str, desc: str, category: int) -> bool:
         """Insere um artefato na campanha no banco de dados."""
         query = db.query_artifacts["register"]
         values = (campaign_id, name, desc, category)

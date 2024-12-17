@@ -53,7 +53,7 @@ class Controller:
 
     def get_campaigns(self, user_id: int) -> List[Dict[str, Any]]:
         return self.database.select_campaigns(user_id)
-  
+
     def get_campaign(self, id: int):
         return self.database.select_campaign(id)
 
@@ -82,7 +82,7 @@ class Controller:
 
     def delete_character(self, id: int):
         self.database.delete_character(id)
-        
+
     def enter_campaign_as_master(self, code: int) -> Dict[str, Any]:
         """
         Entra em uma campanha como mestre, associando o usuário à campanha.
@@ -106,17 +106,23 @@ class Controller:
             return {"campaign": campaign_data, "user_type": "player"}
         return {}
 
-    def add_artifact_to_campaign(self, campaign_code: int, name: str, desc: str, category: str) -> bool:
-        """
-        Adiciona um artefato à campanha.
-        :param campaign_code: Código da campanha.
-        :param name: Nome do artefato.
-        :param desc: Descrição do artefato.
-        :param category: Categoria do artefato.
-        :return: True se artefato foi adicionado com sucesso, False caso contrário.
-        """
-        artifact_added = self.database.insert_artifact(campaign_code, name, desc, category)
-        return artifact_added
+    # def add_artifact_to_campaign(self, campaign_code: int, name: str, desc: str, category: str) -> bool:
+    #     """
+    #     Adiciona um artefato à campanha.
+    #     :param campaign_code: Código da campanha.
+    #     :param name: Nome do artefato.
+    #     :param desc: Descrição do artefato.
+    #     :param category: Categoria do artefato.
+    #     :return: True se artefato foi adicionado com sucesso, False caso contrário.
+    #     """
+    #     artifact_added = self.database.insert_artifact(campaign_code, name, desc, category)
+    #     return artifact_added
+
+    def add_artifact_to_campaign(self, artifact_data: dict) -> bool:
+        return self.database.insert_artifact(artifact_data["campaign_id"], artifact_data["name"], artifact_data["desc"], artifact_data["category"])
+
+    def get_artifacts_by_campaign(self, campaign_id: int) -> list:
+        pass
 
     def add_item_to_character(self, artifact_code: int, character_code: int) -> bool:
         """
