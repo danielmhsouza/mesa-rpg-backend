@@ -74,9 +74,13 @@ class Route:
         return jsonify({"message": f"Você entrou na campanha {campaign} com o personagem {character}!"}), 200
         
     def get_character(self, campaign_id: int, user_id: int):
-        if not campaign_id or not user_id:
+        if not campaign_id:
             return jsonify({"error": "Parâmetros 'campaign_id' e 'user_id' são obrigatórios"}), 500
-        character = self.controller.get_characters_by_campaign_and_user(campaign_id, user_id)
+        if user_id != 0:
+            character = self.controller.get_characters_by_campaign_and_user(campaign_id, user_id)
+        else:
+            character = self.controller.get_all_character_by_campaign(campaign_id)
+            
         if character:
             return jsonify({"characters": character}), 200
         return jsonify({"message": "Nenhum personagem encontrado"}), 500

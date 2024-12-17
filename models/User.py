@@ -14,12 +14,7 @@ class User:
 
         values = (user_data['user_name'], user_data['email'], user_data['password'])
         if self.database.execute_query(self.query["register"], values):
-            try:
-                mycursor = self.database.cursor()
-                mycursor.execute("SELECT LAST_INSERT_ID()")
-                return mycursor.fetchone()[0]
-            finally:
-                mycursor.close()
+                return self.database.return_last_insert()
         return 0
 
     def select_user(self, email: str, password: str) -> dict:

@@ -65,8 +65,6 @@ class Controller:
             return True
         return False
     
-    def create_character(self, character: dict, id_camp: int, id_user: int) -> int:
-        return self.campaign.character.insert_character(character, id_camp, id_user)
     
     def insert_entry_campaign(self, id_camp: int, id_user: int):
         return self.campaign.insert_entry_campaign(id_user, id_camp)
@@ -77,11 +75,20 @@ class Controller:
     def get_campaign(self, id: int):
         return self.campaign.select_campaign(id)
     
+        ###### CHARACTER METHODS
+
+    def create_character(self, character: dict, id_camp: int, id_user: int) -> int:
+        return self.campaign.character.insert_character(character, id_camp, id_user)
     
-    #########
 
     def get_characters_by_campaign_and_user(self, campaign_id: int, user_id: int):
-        return self.database.select_character_by_campaign_and_user(campaign_id, user_id)
+        return self.campaign.character.select_character_by_campaign_and_user(campaign_id, user_id)
+    
+    def get_all_character_by_campaign(self, campaign_id):
+        return self.campaign.character.select_characters_by_campaign(campaign_id)
+        #########
+
+    #########
 
     def delete_character(self, id: int):
         self.database.delete_character(id)

@@ -3,7 +3,7 @@ from routes.Route import Route
 from flask_cors import CORS
 
 app = Flask(__name__)
-cors = CORS(app)
+cors = CORS(app, resources={r"/*": {"origins": "*"}}, methods=["GET", "POST", "PUT", "DELETE"], allow_headers=["Content-Type", "Authorization"])
 app.config['CORS_HEADERS'] = 'Content-Type'
 route = Route()
 
@@ -80,17 +80,17 @@ def rt_create_character():
 @app.route('/personagem', methods=['GET'])
 def rt_get_personagem():
     campaign_id = request.args.get("campaign_id")
-    user_id = request.args.get("user_id")
+    user_id = request.args.get("user_id") if request.args.get("user_id") else 0
 
     # Validação dos parâmetros
-    if not campaign_id or not user_id:
-        return jsonify({"error": "Parâmetros 'campaign_id' e 'user_id' são obrigatórios"}), 400
+    if not campaign_id:
+        return jsonify({"error": "Parâmetro 'campaign_id' é obrigatório"}), 500
 
     try:
         campaign_id = int(campaign_id)
         user_id = int(user_id)
     except ValueError:
-        return jsonify({"error": "Parâmetros devem ser números inteiros"}), 400
+        return jsonify({"error": "Parâmetros devem ser números inteiros"}), 500
 
     return route.get_character(campaign_id, user_id)
 

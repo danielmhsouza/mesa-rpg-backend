@@ -153,44 +153,7 @@ class Database:
             }
         return {}
 
-    def select_character_by_campaign_and_user(self, campaign_id: int, user_id: int) -> list:
-        """
-        Busca personagens de um usuário em uma campanha específica.
-        :param campaign_id: ID da campanha.
-        :param user_id: ID do usuário.
-        :return: Lista de personagens encontrados.
-        """
-        query = db.query_characters["select_by_campaign_user"]
-        values = (campaign_id, user_id)
-        result = self._execute_select_query(query, values)
-
-        characters = []
-        for row in result:
-            characters.append({
-                "character_id": row[0],
-                "user_id": row[1],
-                "campaign_id": row[2],
-                "name": row[3],
-                "level": row[4],
-                "class": row[5],
-                "img_link": row[6],
-                "race": row[7],
-                "money": row[8],
-                "force": row[9],
-                "dest": row[10],
-                "consti": row[11],
-                "intel": row[12],
-                "wisdom": row[13],
-                "charisma": row[14],
-                "armor": row[15],
-                "initi": row[16],
-                "desloc": row[17],
-                "hp": row[18],
-                "mana": row[19],
-                "b_proef": row[20],
-                "inspiration": row[21]
-            })
-        return characters
+    
 
     def update_character(self, character_data: Dict[str, Any]) -> bool:
         """
